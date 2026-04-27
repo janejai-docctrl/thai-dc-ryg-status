@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIR Dashboard — THAI DC 1-RYG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --approve: #10b981;
+    --approve-dim: #064e3b;
+    --notapprove: #ef4444;
+    --notapprove-dim: #7f1d1d;
+    --unknown: #f59e0b;
+    --unknown-dim: #78350f;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --accent: #3b82f6;
+    --accent2: #6366f1;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1b2e 0%, #0a1628 50%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-badge {
+    background: var(--accent);
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .header-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .header-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+    color: var(--approve);
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--approve);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+  .last-update {
+    font-size: 11px; color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .sync-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer; padding: 6px 12px;
+    border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .sync-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* MAIN */
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 8px; padding: 10px 16px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; color: #fbbf24;
+  }
+  .alert-banner.connected {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.3);
+    color: var(--approve);
+  }
+  .alert-banner.hidden { display: none; }
+
+  /* STAT CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.total::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .stat-card.approve::before { background: var(--approve); }
+  .stat-card.notapprove::before { background: var(--notapprove); }
+  .stat-card.unknown::before { background: var(--unknown); }
+
+  .stat-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px;
+  }
+  .stat-number {
+    font-size: 40px; font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1;
+  }
+  .stat-card.total .stat-number { color: var(--accent); }
+  .stat-card.approve .stat-number { color: var(--approve); }
+  .stat-card.notapprove .stat-number { color: var(--notapprove); }
+  .stat-card.unknown .stat-number { color: var(--unknown); }
+  .stat-pct {
+    font-size: 12px; color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 6px;
+  }
+  .stat-icon {
+    position: absolute; right: 20px; top: 20px;
+    font-size: 28px; opacity: 0.15;
+  }
+
+  /* CHARTS ROW */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-dim); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-title::before {
+    content: ''; width: 3px; height: 14px;
+    background: var(--accent); border-radius: 2px;
+  }
+
+  /* DONUT CHART */
+  .donut-wrap {
+    display: flex; align-items: center; gap: 24px;
+  }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { flex: 1; }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; border-bottom: 1px solid var(--border);
+  }
+  .legend-item:last-child { border-bottom: none; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-name { flex: 1; font-size: 12px; }
+  .legend-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; font-weight: 600;
+  }
+  .legend-pct { font-size: 11px; color: var(--text-dim); margin-left: 4px; }
+
+  /* BAR CHART — DISCIPLINE */
+  .bar-chart { width: 100%; }
+  .bar-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .bar-label {
+    width: 40px; font-size: 11px; font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim); text-align: right; flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1; height: 22px; background: var(--surface2);
+    border-radius: 4px; overflow: hidden;
+    display: flex;
+  }
+  .bar-seg { height: 100%; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+  .bar-seg.approve { background: var(--approve); }
+  .bar-seg.notapprove { background: var(--notapprove); }
+  .bar-seg.unknown { background: var(--unknown); }
+  .bar-total {
+    width: 32px; font-size: 12px; font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-dim); text-align: right; flex-shrink: 0;
+  }
+
+  /* PROGRESS OVERALL */
+  .progress-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .progress-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-dim); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .progress-title::before {
+    content: ''; width: 3px; height: 14px;
+    background: var(--approve); border-radius: 2px;
+  }
+  .progress-bar-wrap {
+    height: 32px; background: var(--surface2);
+    border-radius: 8px; overflow: hidden;
+    display: flex; margin-bottom: 10px;
+  }
+  .progress-seg { height: 100%; display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.9); transition: width 1s cubic-bezier(.4,0,.2,1);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .progress-seg.approve { background: var(--approve); }
+  .progress-seg.notapprove { background: var(--notapprove); }
+  .progress-seg.unknown { background: var(--unknown); }
+  .progress-labels {
+    display: flex; gap: 20px; justify-content: flex-end;
+  }
+  .progress-label-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-dim);
+  }
+  .progress-label-dot {
+    width: 8px; height: 8px; border-radius: 2px;
+  }
+
+  /* NOT APPROVE TABLE */
+  .table-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .section-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-dim); margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-title-left { display: flex; align-items: center; gap: 8px; }
+  .section-title-left::before {
+    content: ''; width: 3px; height: 14px;
+    background: var(--notapprove); border-radius: 2px;
+  }
+  .badge {
+    padding: 2px 8px; border-radius: 20px; font-size: 11px;
+    font-weight: 600; font-family: 'IBM Plex Mono', monospace;
+  }
+  .badge.red { background: var(--notapprove-dim); color: var(--notapprove); }
+  .badge.yellow { background: var(--unknown-dim); color: var(--unknown); }
+  .badge.green { background: var(--approve-dim); color: var(--approve); }
+  .badge.blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    padding: 8px 12px; text-align: left;
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-dim);
+  }
+  td {
+    padding: 10px 12px;
+    font-size: 12px; border-bottom: 1px solid rgba(30,45,69,0.5);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center; padding: 24px;
+    font-size: 11px; color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* SHEET SETUP SECTION */
+  .setup-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .setup-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text-dim); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .setup-title::before {
+    content: ''; width: 3px; height: 14px;
+    background: var(--accent2); border-radius: 2px;
+  }
+  .setup-steps { display: flex; flex-direction: column; gap: 12px; }
+  .setup-step {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-body { flex: 1; }
+  .step-label { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .step-desc { font-size: 12px; color: var(--text-dim); }
+  code {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--accent);
+  }
+  .sheet-id-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    width: 100%; max-width: 480px; margin-top: 8px;
+  }
+  .sheet-id-input:focus { outline: none; border-color: var(--accent); }
+  .connect-btn {
+    background: var(--accent); border: none; color: white;
+    padding: 8px 20px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 600; margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .connect-btn:hover { background: #2563eb; }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .donut-wrap { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <span class="logo-badge">HUAWEI</span>
+    <div>
+      <div class="header-title">MIR Dashboard — THAI DC 1-RYG</div>
+      <div class="header-sub">Rayong EEC · Doc Control: Janejai Seesom</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+    <div class="last-update" id="lastUpdate">Updated: 27 Apr 2026 13:44</div>
+    <button class="sync-btn" onclick="syncFromSheets()">⟳ Sync Sheets</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner">
+    ⚠ ยังไม่ได้เชื่อม Google Sheets — แสดงข้อมูล Snapshot 27/04/2026 ·
+    <a href="#setup" style="color:#fbbf24">วิธี setup ↓</a>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-label">MIR ทั้งหมด</div>
+      <div class="stat-number" id="numTotal">204</div>
+      <div class="stat-pct">Documents</div>
+      <div class="stat-icon">📁</div>
+    </div>
+    <div class="stat-card approve">
+      <div class="stat-label">✅ Approved</div>
+      <div class="stat-number" id="numApprove">178</div>
+      <div class="stat-pct" id="pctApprove">87.3% of total</div>
+      <div class="stat-icon">✓</div>
+    </div>
+    <div class="stat-card notapprove">
+      <div class="stat-label">❌ Not Approve</div>
+      <div class="stat-number" id="numNotApprove">10</div>
+      <div class="stat-pct" id="pctNotApprove">4.9% of total</div>
+      <div class="stat-icon">✕</div>
+    </div>
+    <div class="stat-card unknown">
+      <div class="stat-label">❓ Unknown</div>
+      <div class="stat-number" id="numUnknown">16</div>
+      <div class="stat-pct" id="pctUnknown">7.8% of total</div>
+      <div class="stat-icon">?</div>
+    </div>
+  </div>
+
+  <!-- OVERALL PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-title">Overall MIR Progress</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-seg approve" id="progApprove" style="width:87.3%">87.3%</div>
+      <div class="progress-seg notapprove" id="progNotApprove" style="width:4.9%">4.9%</div>
+      <div class="progress-seg unknown" id="progUnknown" style="width:7.8%">7.8%</div>
+    </div>
+    <div class="progress-labels">
+      <div class="progress-label-item">
+        <div class="progress-label-dot" style="background:var(--approve)"></div>
+        <span>APPROVE</span>
+      </div>
+      <div class="progress-label-item">
+        <div class="progress-label-dot" style="background:var(--notapprove)"></div>
+        <span>NOT APPROVE</span>
+      </div>
+      <div class="progress-label-item">
+        <div class="progress-label-dot" style="background:var(--unknown)"></div>
+        <span>UNKNOWN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="charts-row">
+
+    <!-- DONUT CHART -->
+    <div class="chart-card">
+      <div class="chart-title">Status Distribution</div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="#1a2235" stroke-width="22"/>
+          <!-- approve: 87.3% = 339.3 of 339.3 total -->
+          <circle cx="70" cy="70" r="54" fill="none"
+            stroke="var(--approve)" stroke-width="22"
+            stroke-dasharray="296.2 43.1"
+            stroke-dashoffset="85" transform="rotate(-90 70 70)"/>
+          <!-- not approve: 4.9% -->
+          <circle cx="70" cy="70" r="54" fill="none"
+            stroke="var(--notapprove)" stroke-width="22"
+            stroke-dasharray="16.6 322.7"
+            stroke-dashoffset="-211.2" transform="rotate(-90 70 70)"/>
+          <!-- unknown: 7.8% -->
+          <circle cx="70" cy="70" r="54" fill="none"
+            stroke="var(--unknown)" stroke-width="22"
+            stroke-dasharray="26.5 312.8"
+            stroke-dashoffset="-227.8" transform="rotate(-90 70 70)"/>
+          <text x="70" y="65" text-anchor="middle" fill="#e2e8f0"
+            font-size="22" font-weight="700" font-family="IBM Plex Mono,monospace">204</text>
+          <text x="70" y="82" text-anchor="middle" fill="#64748b"
+            font-size="10" font-family="IBM Plex Mono,monospace">TOTAL</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--approve)"></div>
+            <span class="legend-name">APPROVE</span>
+            <span class="legend-val" style="color:var(--approve)" id="leg-approve">178</span>
+            <span class="legend-pct">(87.3%)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--notapprove)"></div>
+            <span class="legend-name">NOT APPROVE</span>
+            <span class="legend-val" style="color:var(--notapprove)" id="leg-notapprove">10</span>
+            <span class="legend-pct">(4.9%)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--unknown)"></div>
+            <span class="legend-name">UNKNOWN</span>
+            <span class="legend-val" style="color:var(--unknown)" id="leg-unknown">16</span>
+            <span class="legend-pct">(7.8%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAR CHART BY DISCIPLINE -->
+    <div class="chart-card">
+      <div class="chart-title">By Discipline</div>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+
+  </div>
+
+  <!-- NOT APPROVE TABLE -->
+  <div class="table-section">
+    <div class="section-title">
+      <div class="section-title-left">❌ NOT APPROVE — ต้องส่งใหม่</div>
+      <span class="badge red" id="notApproveBadge">10 files</span>
+    </div>
+    <table id="notApproveTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Discipline</th>
+          <th>File Name / Ref No.</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="notApproveTbody">
+        <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- UNKNOWN TABLE -->
+  <div class="table-section">
+    <div class="section-title">
+      <div class="section-title-left" style="--color:var(--unknown)">❓ UNKNOWN — ต้องตรวจสอบ</div>
+      <span class="badge yellow" id="unknownBadge">16 files</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Discipline</th>
+          <th>File Name / Ref No.</th>
+          <th>Detection Clue</th>
+        </tr>
+      </thead>
+      <tbody id="unknownTbody">
+        <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SETUP SECTION -->
+  <div class="setup-section" id="setup">
+    <div class="setup-title">🔗 Connect Google Sheets (Equipment List v2)</div>
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-label">เปิด Equipment List v2 ใน Google Sheets</div>
+          <div class="step-desc">Sheet ID ปัจจุบัน: <code id="currentSheetId">1WRtWs22yDcSz7v9StSGCj_l3AvtB5nx7BB5wgAVCExw</code></div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-label">ตั้งค่า Share → Anyone with link → Viewer</div>
+          <div class="step-desc">Share → Copy link → ต้องเป็น <code>Anyone with the link</code></div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-label">ใส่ Sheet ID แล้วกด Connect</div>
+          <div class="step-desc">
+            <input class="sheet-id-input" id="sheetIdInput"
+              placeholder="วาง Sheet ID ที่นี่ เช่น 1WRtWs22yDcSz7v9StSGCj_l3AvtB5nx7BB5wgAVCExw"
+              value="1WRtWs22yDcSz7v9StSGCj_l3AvtB5nx7BB5wgAVCExw">
+            <br>
+            <button class="connect-btn" onclick="connectSheets()">🔗 Connect & Sync</button>
+          </div>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-label">Push ไฟล์นี้ขึ้น GitHub</div>
+          <div class="step-desc">
+            เปิด CMD/Terminal แล้วรัน:<br>
+            <code>cd D:\THAI_DC_RYG\thai-dc-ryg-status</code><br>
+            <code>git add index.html</code><br>
+            <code>git commit -m "Update dashboard v2 with charts"</code><br>
+            <code>git push</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<footer class="footer">
+  HUAWEI TECHNOLOGIES (THAILAND) · THAI DC 1-RYG · Rayong EEC &nbsp;|&nbsp;
+  Doc Control: Janejai Seesom &nbsp;|&nbsp; Dashboard v2.0 &nbsp;|&nbsp;
+  <span id="footerUpdate">Snapshot: 27 Apr 2026</span>
+</footer>
+
+<script>
+// =============================================
+// HARDCODED DATA (Snapshot 27 Apr 2026)
+// =============================================
+const SNAPSHOT = {
+  total: 204,
+  approve: 178,
+  not_approve: 10,
+  unknown: 16,
+  updated: '27 Apr 2026 13:44',
+  disciplines: [
+    { name:'EE',  approve:62, not_approve:2, unknown:6  },
+    { name:'ME',  approve:52, not_approve:2, unknown:6  },
+    { name:'AC',  approve:30, not_approve:2, unknown:0  },
+    { name:'ARC', approve:24, not_approve:4, unknown:4  },
+    { name:'GEN', approve:6,  not_approve:0, unknown:0  },
+    { name:'ELV', approve:4,  not_approve:0, unknown:0  },
+  ],
+  not_approve_files: [
+    { disc:'AC',  ref:'AC-2-011', name:'Black Steel Pipe ครั้งที่ 2' },
+    { disc:'ARC', ref:'ARC-1-007', name:'Hot Aisle Containment (Material)' },
+    { disc:'ARC', ref:'ARC-1-022', name:'Hot Aisle Containment (Installation)' },
+    { disc:'ARC', ref:'ARC-1-030', name:'Hot Aisle Containment (Rev)' },
+    { disc:'ARC', ref:'ARC-1-035', name:'Containment Panel' },
+    { disc:'EE',  ref:'EE-1-030', name:'Cable Basket Tray' },
+    { disc:'EE',  ref:'EE-1-041', name:'Cable Tray (Rev)' },
+    { disc:'ME',  ref:'ME-1-002', name:'Steel Pipe and Fitting' },
+    { disc:'ME',  ref:'ME-1-018', name:'Pipe Insulation' },
+    { disc:'AC',  ref:'AC-2-025', name:'Chilled Water Pipe (Rev)' },
+  ],
+  unknown_files: [
+    { disc:'EE', ref:'EE-1-019', name:'SuperCore Rack 52U + Stud M10x80', clue:'stamp=True|signed=True' },
+    { disc:'EE', ref:'EE-1-021', name:'rPDU Rack Mount', clue:'stamp=True|signed=False' },
+    { disc:'EE', ref:'EE-1-033', name:'UPS Battery Cabinet', clue:'stamp=False|signed=True' },
+    { disc:'EE', ref:'EE-1-038', name:'LV Panel', clue:'stamp=False|signed=True' },
+    { disc:'EE', ref:'EE-1-044', name:'Cable Tray Support', clue:'stamp=True|signed=True' },
+    { disc:'EE', ref:'EE-1-049', name:'Earthing Cable', clue:'stamp=False|signed=True' },
+    { disc:'ME', ref:'ME-1-009', name:'Chiller Unit', clue:'stamp=True|signed=False' },
+    { disc:'ME', ref:'ME-1-015', name:'Cooling Tower', clue:'stamp=False|signed=True' },
+    { disc:'ME', ref:'ME-1-020', name:'Pump Set', clue:'stamp=True|signed=True' },
+    { disc:'ME', ref:'ME-1-027', name:'Air Handling Unit', clue:'stamp=False|signed=True' },
+    { disc:'ME', ref:'ME-1-031', name:'Expansion Tank', clue:'stamp=True|signed=False' },
+    { disc:'ME', ref:'ME-1-036', name:'Pressurization Unit', clue:'stamp=False|signed=True' },
+    { disc:'ARC', ref:'ARC-1-012', name:'Floor Tile', clue:'stamp=True|signed=True' },
+    { disc:'ARC', ref:'ARC-1-018', name:'Raised Floor Pedestal', clue:'stamp=False|signed=True' },
+    { disc:'ARC', ref:'ARC-1-025', name:'Wall Panel', clue:'stamp=True|signed=False' },
+    { disc:'ARC', ref:'ARC-1-029', name:'Ceiling Panel', clue:'stamp=False|signed=True' },
+  ]
+};
+
+// =============================================
+// RENDER FUNCTIONS
+// =============================================
+function renderAll(data) {
+  const { total, approve, not_approve, unknown } = data;
+
+  // Stat cards
+  document.getElementById('numTotal').textContent = total;
+  document.getElementById('numApprove').textContent = approve;
+  document.getElementById('numNotApprove').textContent = not_approve;
+  document.getElementById('numUnknown').textContent = unknown;
+  document.getElementById('pctApprove').textContent = (approve/total*100).toFixed(1) + '% of total';
+  document.getElementById('pctNotApprove').textContent = (not_approve/total*100).toFixed(1) + '% of total';
+  document.getElementById('pctUnknown').textContent = (unknown/total*100).toFixed(1) + '% of total';
+
+  // Progress bar
+  const pA = (approve/total*100).toFixed(1);
+  const pN = (not_approve/total*100).toFixed(1);
+  const pU = (unknown/total*100).toFixed(1);
+  document.getElementById('progApprove').style.width = pA+'%';
+  document.getElementById('progApprove').textContent = pA+'%';
+  document.getElementById('progNotApprove').style.width = pN+'%';
+  document.getElementById('progNotApprove').textContent = pN+'%';
+  document.getElementById('progUnknown').style.width = pU+'%';
+  document.getElementById('progUnknown').textContent = pU+'%';
+
+  // Legend
+  document.getElementById('leg-approve').textContent = approve;
+  document.getElementById('leg-notapprove').textContent = not_approve;
+  document.getElementById('leg-unknown').textContent = unknown;
+
+  // Bar chart disciplines
+  const bc = document.getElementById('barChart');
+  bc.innerHTML = '';
+  data.disciplines.forEach(d => {
+    const tot = d.approve + d.not_approve + d.unknown;
+    const pA = (d.approve/tot*100).toFixed(1);
+    const pN = (d.not_approve/tot*100).toFixed(1);
+    const pU = (d.unknown/tot*100).toFixed(1);
+    bc.innerHTML += `
+      <div class="bar-row">
+        <div class="bar-label">${d.name}</div>
+        <div class="bar-track">
+          <div class="bar-seg approve" style="width:${pA}%" title="APPROVE: ${d.approve}"></div>
+          <div class="bar-seg notapprove" style="width:${pN}%" title="NOT APPROVE: ${d.not_approve}"></div>
+          <div class="bar-seg unknown" style="width:${pU}%" title="UNKNOWN: ${d.unknown}"></div>
+        </div>
+        <div class="bar-total">${tot}</div>
+      </div>`;
+  });
+
+  // NOT APPROVE table
+  const nbody = document.getElementById('notApproveTbody');
+  nbody.innerHTML = '';
+  (data.not_approve_files||[]).forEach((f,i) => {
+    nbody.innerHTML += `
+      <tr>
+        <td class="mono">${i+1}</td>
+        <td><span class="badge blue">${f.disc}</span></td>
+        <td><span class="mono">${f.ref}</span><br><span style="color:var(--text-dim);font-size:11px">${f.name}</span></td>
+        <td><span class="badge red">NOT APPROVE</span></td>
+      </tr>`;
+  });
+
+  // UNKNOWN table
+  const ubody = document.getElementById('unknownTbody');
+  ubody.innerHTML = '';
+  (data.unknown_files||[]).forEach((f,i) => {
+    ubody.innerHTML += `
+      <tr>
+        <td class="mono">${i+1}</td>
+        <td><span class="badge blue">${f.disc}</span></td>
+        <td><span class="mono">${f.ref}</span><br><span style="color:var(--text-dim);font-size:11px">${f.name}</span></td>
+        <td><span style="color:var(--text-dim);font-size:11px;font-family:'IBM Plex Mono',monospace">${f.clue||''}</span></td>
+      </tr>`;
+  });
+
+  // Badges
+  document.getElementById('notApproveBadge').textContent = not_approve + ' files';
+  document.getElementById('unknownBadge').textContent = unknown + ' files';
+}
+
+// =============================================
+// GOOGLE SHEETS INTEGRATION
+// =============================================
+const SHEET_ID_KEY = 'mir_sheet_id';
+let SHEET_ID = localStorage.getItem(SHEET_ID_KEY) || '1WRtWs22yDcSz7v9StSGCj_l3AvtB5nx7BB5wgAVCExw';
+
+function connectSheets() {
+  const id = document.getElementById('sheetIdInput').value.trim();
+  if (!id) return alert('กรุณาใส่ Sheet ID ก่อน');
+  SHEET_ID = id;
+  localStorage.setItem(SHEET_ID_KEY, id);
+  syncFromSheets();
+}
+
+async function syncFromSheets() {
+  if (!SHEET_ID) return;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=MIR_Status`;
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(47).slice(0,-2));
+    const rows = json.table.rows;
+
+    let approve=0, not_approve=0, unknown=0;
+    const discMap = {};
+
+    rows.forEach(row => {
+      const status = row.c[4]?.v || '';
+      const fname  = row.c[1]?.v || '';
+      const disc   = (fname.match(/REQ-([A-Z]+)-/) || ['','OTHER'])[1];
+
+      if (!discMap[disc]) discMap[disc] = {approve:0,not_approve:0,unknown:0};
+
+      if (status === 'APPROVE')      { approve++;      discMap[disc].approve++; }
+      else if (status === 'NOT APPROVE') { not_approve++; discMap[disc].not_approve++; }
+      else if (status === 'UNKNOWN') { unknown++;      discMap[disc].unknown++; }
+    });
+
+    const total = approve + not_approve + unknown;
+    const disciplines = Object.entries(discMap).map(([name,v])=>({name,...v}));
+
+    const data = { ...SNAPSHOT, total, approve, not_approve, unknown, disciplines };
+    renderAll(data);
+
+    const now = new Date().toLocaleString('th-TH');
+    document.getElementById('lastUpdate').textContent = 'Updated: ' + now;
+    document.getElementById('footerUpdate').textContent = 'Live: ' + now;
+    document.getElementById('alertBanner').className = 'alert-banner connected';
+    document.getElementById('alertBanner').innerHTML = '✅ เชื่อม Google Sheets สำเร็จ — ข้อมูล Live อัพเดทล่าสุด: ' + now;
+
+  } catch(e) {
+    console.warn('Sheets fetch failed, using snapshot data:', e.message);
+    renderAll(SNAPSHOT);
+  }
+}
+
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderAll(SNAPSHOT); // show snapshot first
+  if (SHEET_ID) {
+    document.getElementById('sheetIdInput').value = SHEET_ID;
+    syncFromSheets();   // then try live
+  }
+});
+</script>
+</body>
+</html>
