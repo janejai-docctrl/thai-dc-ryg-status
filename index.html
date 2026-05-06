@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THAI DC 1-RYG — MIR Status Dashboard</title>
+<title>THAI DC 1-RYG — MIR / WIR Status Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -19,6 +19,7 @@
     --text-dim: #94a3b8;
     --mono: 'IBM Plex Mono', monospace;
     --sans: 'Sarabun', sans-serif;
+    --wir-accent: #a78bfa;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,10 +29,9 @@
     color: var(--text);
     font-family: var(--sans);
     min-height: 100vh;
-    padding: 0;
   }
 
-  /* Header */
+  /* ── Header ── */
   .header {
     background: linear-gradient(135deg, #0d1b2e 0%, #0a1628 100%);
     border-bottom: 1px solid var(--border);
@@ -49,7 +49,7 @@
     font-family: var(--mono); font-size: 14px; font-weight: 600; color: #fff;
   }
   .header-title h1 { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
-  .header-title p { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
+  .header-title p  { font-size: 12px; color: var(--text-dim); font-family: var(--mono); }
   .header-right { display: flex; align-items: center; gap: 12px; }
   .last-updated {
     font-family: var(--mono); font-size: 11px; color: var(--text-dim);
@@ -64,10 +64,47 @@
   .refresh-btn:hover { opacity: 0.85; }
   .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Main */
-  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  /* ── Tab Switcher ── */
+  .tab-bar {
+    background: #0d1421;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 14px 24px;
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--text-dim);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active-mir {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn.active-wir {
+    color: var(--wir-accent);
+    border-bottom-color: var(--wir-accent);
+  }
+  .tab-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px;
+    margin-left: 6px; font-family: var(--mono);
+  }
+  .chip-mir { background: rgba(0,194,255,0.12); color: var(--accent); }
+  .chip-wir { background: rgba(167,139,250,0.12); color: var(--wir-accent); }
 
-  /* Summary Cards */
+  /* ── Main ── */
+  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Summary Cards ── */
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -75,28 +112,23 @@
     margin-bottom: 28px;
   }
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; position: relative; overflow: hidden;
   }
-  .card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  }
-  .card.total::before { background: var(--accent); }
-  .card.approve::before { background: var(--green); }
-  .card.warning::before { background: var(--red); }
-  .card.wait::before { background: var(--gray); }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .card.total::before    { background: var(--accent); }
+  .card.total-wir::before{ background: var(--wir-accent); }
+  .card.approve::before  { background: var(--green); }
+  .card.warning::before  { background: var(--red); }
+  .card.wait::before     { background: var(--gray); }
 
   .card-label { font-size: 12px; color: var(--text-dim); font-family: var(--mono); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
   .card-value { font-size: 42px; font-weight: 700; font-family: var(--mono); line-height: 1; }
-  .card.total .card-value { color: var(--accent); }
-  .card.approve .card-value { color: var(--green); }
-  .card.warning .card-value { color: var(--red); }
-  .card.wait .card-value { color: var(--gray); }
+  .card.total     .card-value { color: var(--accent); }
+  .card.total-wir .card-value { color: var(--wir-accent); }
+  .card.approve   .card-value { color: var(--green); }
+  .card.warning   .card-value { color: var(--red); }
+  .card.wait      .card-value { color: var(--gray); }
   .card-sub { font-size: 13px; color: var(--text-dim); margin-top: 6px; }
   .card-pct {
     position: absolute; bottom: 16px; right: 16px;
@@ -104,31 +136,25 @@
     background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 4px;
   }
 
-  /* Progress Bar */
+  /* ── Progress Bar ── */
   .progress-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 28px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; margin-bottom: 28px;
   }
   .progress-label {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 10px; font-size: 13px; color: var(--text-dim);
   }
   .progress-bar {
-    height: 12px; background: #1e2d40; border-radius: 6px; overflow: hidden;
-    display: flex;
+    height: 12px; background: #1e2d40; border-radius: 6px; overflow: hidden; display: flex;
   }
-  .progress-approve { background: var(--green); transition: width 0.8s ease; }
-  .progress-warning { background: var(--red); transition: width 0.8s ease; }
-  .progress-wait { background: #2d3748; transition: width 0.8s ease; }
-  .progress-legend {
-    display: flex; gap: 20px; margin-top: 10px; font-size: 12px; font-family: var(--mono);
-  }
+  .progress-approve { background: var(--green);   transition: width 0.8s ease; }
+  .progress-warning { background: var(--red);     transition: width 0.8s ease; }
+  .progress-wait    { background: #2d3748;         transition: width 0.8s ease; }
+  .progress-legend  { display: flex; gap: 20px; margin-top: 10px; font-size: 12px; font-family: var(--mono); }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 
-  /* Warning Docs Section */
+  /* ── Warning Section ── */
   .section-title {
     font-size: 14px; font-weight: 700; color: var(--text);
     margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
@@ -138,26 +164,21 @@
     background: var(--red); color: #fff;
     font-size: 11px; padding: 2px 8px; border-radius: 4px;
   }
-
   .warning-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 10px; margin-bottom: 28px;
   }
   .warning-item {
-    background: rgba(239,68,68,0.06);
-    border: 1px solid rgba(239,68,68,0.25);
-    border-radius: 8px; padding: 12px 14px;
-    display: flex; align-items: center; gap: 10px;
+    background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px;
   }
   .warning-icon { font-size: 16px; flex-shrink: 0; }
-  .warning-doc { font-family: var(--mono); font-size: 11px; color: var(--text); word-break: break-all; }
+  .warning-doc  { font-family: var(--mono); font-size: 11px; color: var(--text); word-break: break-all; }
 
-  /* Status Filter + Table */
+  /* ── Table ── */
   .table-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
   }
   .table-header {
     padding: 16px 20px;
@@ -171,13 +192,13 @@
     color: var(--text-dim); font-family: var(--mono); transition: all 0.2s;
   }
   .filter-tab.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
-  .filter-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+  .filter-tab.active-wir-tab { background: var(--wir-accent); color: #000; border-color: var(--wir-accent); font-weight: 600; }
+  .filter-tab:hover:not(.active):not(.active-wir-tab) { border-color: var(--accent); color: var(--accent); }
 
   .search-box {
     background: #0d1421; border: 1px solid var(--border);
     padding: 7px 12px; border-radius: 6px; color: var(--text);
-    font-family: var(--mono); font-size: 12px; width: 220px;
-    outline: none;
+    font-family: var(--mono); font-size: 12px; width: 220px; outline: none;
   }
   .search-box:focus { border-color: var(--accent); }
 
@@ -199,17 +220,29 @@
     font-family: var(--mono); font-size: 11px; font-weight: 600; white-space: nowrap;
   }
   .status-approve { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
-  .status-warning { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
-  .status-wait { background: rgba(107,114,128,0.12); color: var(--gray); border: 1px solid rgba(107,114,128,0.2); }
+  .status-warning { background: rgba(239,68,68,0.12);  color: var(--red);   border: 1px solid rgba(239,68,68,0.25); }
+  .status-wait    { background: rgba(107,114,128,0.12); color: var(--gray);  border: 1px solid rgba(107,114,128,0.2); }
 
   .doc-no { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .doc-no-wir { font-family: var(--mono); font-size: 12px; color: var(--wir-accent); }
   .discipline-badge {
     font-family: var(--mono); font-size: 10px; padding: 2px 7px;
     border-radius: 3px; background: rgba(0,194,255,0.08); color: var(--text-dim);
     border: 1px solid rgba(0,194,255,0.15);
   }
+  .equip-badge {
+    font-family: var(--mono); font-size: 10px; padding: 2px 8px;
+    border-radius: 3px; background: rgba(167,139,250,0.08); color: var(--wir-accent);
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+  .room-badge {
+    font-family: var(--mono); font-size: 10px; padding: 2px 8px;
+    border-radius: 3px; background: rgba(245,158,11,0.08); color: var(--yellow);
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+  .date-cell { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
 
-  /* Pagination */
+  /* ── Pagination ── */
   .pagination {
     padding: 12px 20px; display: flex; align-items: center;
     justify-content: space-between; border-top: 1px solid var(--border);
@@ -225,7 +258,7 @@
   .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .page-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-  /* Loading */
+  /* ── Loading ── */
   .loading-overlay {
     position: fixed; inset: 0; background: rgba(10,15,26,0.85);
     display: flex; align-items: center; justify-content: center;
@@ -242,11 +275,10 @@
   .error-msg {
     background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
     color: #fca5a5; padding: 16px 20px; border-radius: 8px;
-    font-family: var(--mono); font-size: 13px; margin-bottom: 20px;
-    display: none;
+    font-family: var(--mono); font-size: 13px; margin-bottom: 20px; display: none;
   }
 
-  /* Footer */
+  /* ── Footer ── */
   .footer {
     text-align: center; padding: 20px; color: var(--text-dim);
     font-family: var(--mono); font-size: 11px; border-top: 1px solid var(--border);
@@ -257,6 +289,7 @@
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
     .main { padding: 16px; }
     .header { padding: 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
+    .tab-bar { padding: 0 16px; }
   }
 </style>
 </head>
@@ -264,270 +297,438 @@
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text">กำลังโหลดข้อมูล MIR_Cover_List...</div>
+  <div class="loading-text" id="loadingText">กำลังโหลดข้อมูล...</div>
 </div>
 
+<!-- ── HEADER ── -->
 <div class="header">
   <div class="header-left">
     <div class="logo">DC</div>
     <div class="header-title">
-      <h1>THAI DC 1-RYG — MIR Print Status</h1>
+      <h1>THAI DC 1-RYG — Inspection Dashboard</h1>
       <p>HUAWEI / TRUE IDC / MITR · Rayong EEC · Commissioning Phase</p>
     </div>
   </div>
   <div class="header-right">
     <div class="last-updated" id="lastUpdated">กำลังโหลด...</div>
-    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">↻ Refresh</button>
+    <button class="refresh-btn" id="refreshBtn" onclick="reloadCurrent()">↻ Refresh</button>
   </div>
 </div>
 
+<!-- ── TAB BAR ── -->
+<div class="tab-bar">
+  <button class="tab-btn active-mir" id="tabMIR" onclick="switchTab('MIR')">
+    MIR <span class="tab-chip chip-mir" id="mirChip">—</span>
+  </button>
+  <button class="tab-btn" id="tabWIR" onclick="switchTab('WIR')">
+    WIR <span class="tab-chip chip-wir" id="wirChip">—</span>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MIR VIEW -->
+<!-- ══════════════════════════════════════════ -->
 <div class="main">
-  <div class="error-msg" id="errorMsg"></div>
+  <div class="view active" id="viewMIR">
+    <div class="error-msg" id="errorMIR"></div>
 
-  <!-- Summary Cards -->
-  <div class="summary-grid">
-    <div class="card total">
-      <div class="card-label">Total Docs</div>
-      <div class="card-value" id="totalCount">—</div>
-      <div class="card-sub">MIR Cover List</div>
-    </div>
-    <div class="card approve">
-      <div class="card-label">✅ APPROVE</div>
-      <div class="card-value" id="approveCount">—</div>
-      <div class="card-sub">APPROVE</div>
-      <div class="card-pct" id="approvePct">—%</div>
-    </div>
-    <div class="card warning">
-      <div class="card-label">⚠️ แก้ก่อน</div>
-      <div class="card-value" id="warningCount">—</div>
-      <div class="card-sub">WARNING</div>
-      <div class="card-pct" id="warningPct">—%</div>
-    </div>
-    <div class="card wait">
-      <div class="card-label">รอ</div>
-      <div class="card-value" id="waitCount">—</div>
-      <div class="card-sub">ยังไม่ได้ Inspect</div>
-      <div class="card-pct" id="waitPct">—%</div>
-    </div>
-  </div>
-
-  <!-- Progress Bar -->
-  <div class="progress-section">
-    <div class="progress-label">
-      <span>MIR Inspection Progress</span>
-      <span id="progressText" style="font-family:var(--mono);font-size:12px;">—</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-approve" id="progressApprove" style="width:0%"></div>
-      <div class="progress-warning" id="progressWarning" style="width:0%"></div>
-      <div class="progress-wait" id="progressWait" style="width:100%"></div>
-    </div>
-    <div class="progress-legend">
-      <span><span class="legend-dot" style="background:var(--green)"></span>ไม่ต้องปริ้น</span>
-      <span><span class="legend-dot" style="background:var(--red)"></span>แก้ก่อน</span>
-      <span><span class="legend-dot" style="background:#2d3748"></span>รอ</span>
-    </div>
-  </div>
-
-  <!-- Warning Docs -->
-  <div id="warningSection" style="display:none; margin-bottom:28px;">
-    <div class="section-title">
-      ⚠️ Docs ที่ต้องแก้ก่อนปริ้น
-      <span class="badge" id="warningBadge">0</span>
-    </div>
-    <div class="warning-grid" id="warningList"></div>
-  </div>
-
-  <!-- Table -->
-  <div class="table-section">
-    <div class="table-header">
-      <div class="filter-tabs">
-        <button class="filter-tab active" onclick="setFilter('all', this)">ทั้งหมด</button>
-        <button class="filter-tab" onclick="setFilter('approve', this)">✅ ไม่ต้องปริ้น</button>
-        <button class="filter-tab" onclick="setFilter('warning', this)">⚠️ แก้ก่อน</button>
-        <button class="filter-tab" onclick="setFilter('wait', this)">รอ</button>
+    <div class="summary-grid">
+      <div class="card total">
+        <div class="card-label">Total Docs</div>
+        <div class="card-value" id="mir-totalCount">—</div>
+        <div class="card-sub">MIR Cover List</div>
       </div>
-      <input class="search-box" id="searchBox" placeholder="ค้นหา Doc No..." oninput="filterData()">
+      <div class="card approve">
+        <div class="card-label">✅ APPROVE</div>
+        <div class="card-value" id="mir-approveCount">—</div>
+        <div class="card-sub">APPROVE</div>
+        <div class="card-pct" id="mir-approvePct">—%</div>
+      </div>
+      <div class="card warning">
+        <div class="card-label">⚠️ แก้ก่อน</div>
+        <div class="card-value" id="mir-warningCount">—</div>
+        <div class="card-sub">WARNING</div>
+        <div class="card-pct" id="mir-warningPct">—%</div>
+      </div>
+      <div class="card wait">
+        <div class="card-label">รอ</div>
+        <div class="card-value" id="mir-waitCount">—</div>
+        <div class="card-sub">ยังไม่ได้ Inspect</div>
+        <div class="card-pct" id="mir-waitPct">—%</div>
+      </div>
     </div>
 
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Doc No. (MIR)</th>
-            <th>Building</th>
-            <th>Phase</th>
-            <th>Discipline</th>
-            <th>Category</th>
-            <th>Print Status</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-dim);font-family:var(--mono);">กำลังโหลด...</td></tr>
-        </tbody>
-      </table>
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>MIR Inspection Progress</span>
+        <span id="mir-progressText" style="font-family:var(--mono);font-size:12px;">—</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-approve" id="mir-progressApprove" style="width:0%"></div>
+        <div class="progress-warning" id="mir-progressWarning" style="width:0%"></div>
+        <div class="progress-wait"    id="mir-progressWait"    style="width:100%"></div>
+      </div>
+      <div class="progress-legend">
+        <span><span class="legend-dot" style="background:var(--green)"></span>ไม่ต้องปริ้น</span>
+        <span><span class="legend-dot" style="background:var(--red)"></span>แก้ก่อน</span>
+        <span><span class="legend-dot" style="background:#2d3748"></span>รอ</span>
+      </div>
     </div>
 
-    <div class="pagination">
-      <span id="paginationInfo">—</span>
-      <div class="page-btns" id="pageBtns"></div>
+    <div id="mir-warningSection" style="display:none; margin-bottom:28px;">
+      <div class="section-title">
+        ⚠️ Docs ที่ต้องแก้ก่อนปริ้น
+        <span class="badge" id="mir-warningBadge">0</span>
+      </div>
+      <div class="warning-grid" id="mir-warningList"></div>
     </div>
-  </div>
-</div>
 
-<div class="footer">
-  THAI DC 1-RYG · MIR Print Status Dashboard · Data source: MIR_Cover_List (Google Sheets) · Auto-refreshes on load
+    <div class="table-section">
+      <div class="table-header">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setFilter('MIR','all',this)">ทั้งหมด</button>
+          <button class="filter-tab" onclick="setFilter('MIR','approve',this)">✅ ไม่ต้องปริ้น</button>
+          <button class="filter-tab" onclick="setFilter('MIR','warning',this)">⚠️ แก้ก่อน</button>
+          <button class="filter-tab" onclick="setFilter('MIR','wait',this)">รอ</button>
+        </div>
+        <input class="search-box" id="mir-searchBox" placeholder="ค้นหา Doc No..." oninput="filterData('MIR')">
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Doc No. (MIR)</th>
+              <th>Building</th>
+              <th>Phase</th>
+              <th>Discipline</th>
+              <th>Category</th>
+              <th>Print Status</th>
+            </tr>
+          </thead>
+          <tbody id="mir-tableBody">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-dim);font-family:var(--mono);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="mir-paginationInfo">—</span>
+        <div class="page-btns" id="mir-pageBtns"></div>
+      </div>
+    </div>
+  </div><!-- /viewMIR -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- WIR VIEW -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="view" id="viewWIR">
+    <div class="error-msg" id="errorWIR"></div>
+
+    <div class="summary-grid">
+      <div class="card total-wir">
+        <div class="card-label">Total Docs</div>
+        <div class="card-value" id="wir-totalCount">—</div>
+        <div class="card-sub">WIR Cover List</div>
+      </div>
+      <div class="card approve">
+        <div class="card-label">✅ APPROVE</div>
+        <div class="card-value" id="wir-approveCount">—</div>
+        <div class="card-sub">APPROVE</div>
+        <div class="card-pct" id="wir-approvePct">—%</div>
+      </div>
+      <div class="card warning">
+        <div class="card-label">⚠️ แก้ก่อน</div>
+        <div class="card-value" id="wir-warningCount">—</div>
+        <div class="card-sub">WARNING</div>
+        <div class="card-pct" id="wir-warningPct">—%</div>
+      </div>
+      <div class="card wait">
+        <div class="card-label">รอ</div>
+        <div class="card-value" id="wir-waitCount">—</div>
+        <div class="card-sub">ยังไม่ได้ Inspect</div>
+        <div class="card-pct" id="wir-waitPct">—%</div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>WIR Inspection Progress</span>
+        <span id="wir-progressText" style="font-family:var(--mono);font-size:12px;">—</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-approve" id="wir-progressApprove" style="width:0%"></div>
+        <div class="progress-warning" id="wir-progressWarning" style="width:0%"></div>
+        <div class="progress-wait"    id="wir-progressWait"    style="width:100%"></div>
+      </div>
+      <div class="progress-legend">
+        <span><span class="legend-dot" style="background:var(--green)"></span>Approve</span>
+        <span><span class="legend-dot" style="background:var(--red)"></span>แก้ก่อน</span>
+        <span><span class="legend-dot" style="background:#2d3748"></span>รอ</span>
+      </div>
+    </div>
+
+    <div id="wir-warningSection" style="display:none; margin-bottom:28px;">
+      <div class="section-title">
+        ⚠️ WIR ที่ต้องแก้ก่อน
+        <span class="badge" id="wir-warningBadge">0</span>
+      </div>
+      <div class="warning-grid" id="wir-warningList"></div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setFilter('WIR','all',this)">ทั้งหมด</button>
+          <button class="filter-tab" onclick="setFilter('WIR','approve',this)">✅ Approve</button>
+          <button class="filter-tab" onclick="setFilter('WIR','warning',this)">⚠️ แก้ก่อน</button>
+          <button class="filter-tab" onclick="setFilter('WIR','wait',this)">รอ</button>
+        </div>
+        <input class="search-box" id="wir-searchBox" placeholder="ค้นหา WIR No. / Room..." oninput="filterData('WIR')">
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>WIR No.</th>
+              <th>Room No.</th>
+              <th>Equipment Type</th>
+              <th>Building</th>
+              <th>Discipline</th>
+              <th>Inspect Date</th>
+              <th>Print Status</th>
+            </tr>
+          </thead>
+          <tbody id="wir-tableBody">
+            <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-dim);font-family:var(--mono);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span id="wir-paginationInfo">—</span>
+        <div class="page-btns" id="wir-pageBtns"></div>
+      </div>
+    </div>
+  </div><!-- /viewWIR -->
+</div><!-- /main -->
+
+<div class="footer" id="footerText">
+  THAI DC 1-RYG · Inspection Dashboard · Data source: Google Sheets · Auto-refreshes on load
 </div>
 
 <script>
-// === CONFIG ===
-const SHEET_ID = '1SmbzclWyYl7fyqc5SToZEPJk-84n4TCSk_RQor9z0x4';
-const SHEET_NAME = 'MIR_Cover_List';
-const PAGE_SIZE = 30;
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const SHEET_ID   = '1SmbzclWyYl7fyqc5SToZEPJk-84n4TCSk_RQor9z0x4';
+const MIR_SHEET  = 'MIR_Cover_List';
+const WIR_SHEET  = 'WIR_Cover_List';
+const PAGE_SIZE  = 30;
 
-let allData = [];
-let filteredData = [];
-let currentFilter = 'all';
-let currentPage = 1;
+// ── State ──
+const state = {
+  MIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false },
+  WIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false }
+};
 
-// === LOAD DATA ===
-async function loadData() {
+let activeTab = 'MIR';
+
+// ═══════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('viewMIR').classList.toggle('active', tab === 'MIR');
+  document.getElementById('viewWIR').classList.toggle('active', tab === 'WIR');
+  document.getElementById('tabMIR').className = 'tab-btn' + (tab === 'MIR' ? ' active-mir' : '');
+  document.getElementById('tabWIR').className = 'tab-btn' + (tab === 'WIR' ? ' active-wir' : '');
+
+  if (!state[tab].loaded) loadData(tab);
+}
+
+function reloadCurrent() { loadData(activeTab); }
+
+// ═══════════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════════
+async function loadData(tab) {
+  const sheetName = tab === 'MIR' ? MIR_SHEET : WIR_SHEET;
   document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('loadingText').textContent = `กำลังโหลดข้อมูล ${sheetName}...`;
   document.getElementById('refreshBtn').disabled = true;
-  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('error' + tab).style.display = 'none';
 
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-    const res = await fetch(url);
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const res  = await fetch(url);
     const text = await res.text();
-
-    // Parse Google Visualization JSON (wrapped in callback)
     const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
     const cols = json.table.cols.map(c => c.label);
     const rows = json.table.rows || [];
 
-    // Find column indices
-    const colNo = cols.findIndex(c => c === 'No.');
-    const colDoc = cols.findIndex(c => c.includes('Doc No'));
-    const colBldg = cols.findIndex(c => c === 'Building');
-    const colPhase = cols.findIndex(c => c === 'Phase');
-    const colDisc = cols.findIndex(c => c === 'Discipline');
-    const colCat = cols.findIndex(c => c === 'Category');
-    const colPrint = cols.findIndex(c => c === 'Print_Status');
+    if (tab === 'MIR') {
+      const colNo    = cols.findIndex(c => c === 'No.');
+      const colDoc   = cols.findIndex(c => c.includes('Doc No'));
+      const colBldg  = cols.findIndex(c => c === 'Building');
+      const colPhase = cols.findIndex(c => c === 'Phase');
+      const colDisc  = cols.findIndex(c => c === 'Discipline');
+      const colCat   = cols.findIndex(c => c === 'Category');
+      const colPrint = cols.findIndex(c => c === 'Print_Status');
 
-    allData = rows.map(row => {
-      const v = i => row.c[i] ? (row.c[i].v || '') : '';
-      return {
-        no: v(colNo),
-        doc: v(colDoc),
-        building: v(colBldg),
-        phase: v(colPhase),
-        discipline: v(colDisc),
-        category: v(colCat),
-        printStatus: v(colPrint)
-      };
-    }).filter(r => r.doc);
+      state.MIR.data = rows.map(row => {
+        const v = i => (row.c && row.c[i] && row.c[i].v != null) ? row.c[i].v : '';
+        return {
+          no: v(colNo), doc: v(colDoc), building: v(colBldg),
+          phase: v(colPhase), discipline: v(colDisc),
+          category: v(colCat), printStatus: v(colPrint)
+        };
+      }).filter(r => r.doc);
 
-    document.getElementById('lastUpdated').textContent = `Updated: ${new Date().toLocaleString('th-TH', {dateStyle:'short',timeStyle:'short'})}`;
-    updateSummary();
-    filterData();
+    } else {
+      // WIR columns: No. | Doc No. (WIR) | Room No. | Equipment_Type | Building | Discipline | Inspect_Date | Print_Status
+      const colNo    = cols.findIndex(c => c === 'No.');
+      const colDoc   = cols.findIndex(c => c.toLowerCase().includes('doc no') || c.toLowerCase().includes('wir'));
+      const colRoom  = cols.findIndex(c => c.toLowerCase().includes('room'));
+      const colEquip = cols.findIndex(c => c.toLowerCase().includes('equipment'));
+      const colBldg  = cols.findIndex(c => c === 'Building');
+      const colDisc  = cols.findIndex(c => c === 'Discipline');
+      const colDate  = cols.findIndex(c => c.toLowerCase().includes('date') || c.toLowerCase().includes('inspect'));
+      const colPrint = cols.findIndex(c => c === 'Print_Status');
+
+      state.WIR.data = rows.map(row => {
+        const v  = i => (row.c && row.c[i] && row.c[i].v != null) ? row.c[i].v : '';
+        const vf = i => (row.c && row.c[i] && row.c[i].f != null) ? row.c[i].f : v(i);
+        return {
+          no: v(colNo), doc: v(colDoc), room: v(colRoom),
+          equipment: v(colEquip), building: v(colBldg),
+          discipline: v(colDisc), inspectDate: vf(colDate),
+          printStatus: v(colPrint)
+        };
+      }).filter(r => r.doc);
+    }
+
+    state[tab].loaded = true;
+    document.getElementById('lastUpdated').textContent =
+      `Updated: ${new Date().toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'})}`;
+
+    updateSummary(tab);
+    filterData(tab);
+    updateChips();
 
   } catch (err) {
     console.error(err);
-    const errEl = document.getElementById('errorMsg');
-    errEl.textContent = `❌ โหลดข้อมูลไม่ได้: ${err.message} — ตรวจสอบว่า Sheet เป็น Public หรือ Anyone with link can view`;
+    const errEl = document.getElementById('error' + tab);
+    errEl.textContent = `❌ โหลด ${tab} ไม่ได้: ${err.message} — ตรวจสอบว่า Sheet "${tab === 'MIR' ? MIR_SHEET : WIR_SHEET}" เป็น Public และ Sheet name ถูกต้อง`;
     errEl.style.display = 'block';
-    // Fallback: use hardcoded summary
-    showFallback();
+    if (tab === 'MIR') showFallbackMIR();
+
   } finally {
     document.getElementById('loadingOverlay').style.display = 'none';
     document.getElementById('refreshBtn').disabled = false;
   }
 }
 
-function showFallback() {
-  document.getElementById('totalCount').textContent = '271';
-  document.getElementById('approveCount').textContent = '69';
-  document.getElementById('warningCount').textContent = '11';
-  document.getElementById('waitCount').textContent = '191';
-  document.getElementById('approvePct').textContent = '25%';
-  document.getElementById('warningPct').textContent = '4%';
-  document.getElementById('waitPct').textContent = '71%';
-  document.getElementById('progressApprove').style.width = '25%';
-  document.getElementById('progressWarning').style.width = '4%';
-  document.getElementById('progressWait').style.width = '71%';
-  document.getElementById('progressText').textContent = '69/271 inspected';
-  document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--yellow);font-family:var(--mono);">⚠️ ไม่สามารถโหลดข้อมูลแบบ live ได้ — กรุณาตรวจสอบ Sheet permissions</td></tr>`;
+function showFallbackMIR() {
+  ['totalCount','approveCount','warningCount','waitCount'].forEach(id =>
+    document.getElementById('mir-'+id).textContent = '—');
+  document.getElementById('mir-tableBody').innerHTML =
+    `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--yellow);font-family:var(--mono);">⚠️ ไม่สามารถโหลดข้อมูลแบบ live — ตรวจสอบ Sheet permissions</td></tr>`;
 }
 
-// === SUMMARY ===
-function updateSummary() {
-  const total = allData.length;
-  const approve = allData.filter(r => r.printStatus.includes('APPROVE')).length;
-  const warning = allData.filter(r => r.printStatus.includes('WARNING')).length;
-  const wait = total - approve - warning;
+// ═══════════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════════
+function updateSummary(tab) {
+  const p      = tab.toLowerCase() + '-';
+  const data   = state[tab].data;
+  const total   = data.length;
+  const approve = data.filter(r => String(r.printStatus).toUpperCase().includes('APPROVE')).length;
+  const warning = data.filter(r => String(r.printStatus).toUpperCase().includes('WARNING')).length;
+  const wait    = total - approve - warning;
 
-  document.getElementById('totalCount').textContent = total;
-  document.getElementById('approveCount').textContent = approve;
-  document.getElementById('warningCount').textContent = warning;
-  document.getElementById('waitCount').textContent = wait;
-  document.getElementById('approvePct').textContent = Math.round(approve/total*100) + '%';
-  document.getElementById('warningPct').textContent = Math.round(warning/total*100) + '%';
-  document.getElementById('waitPct').textContent = Math.round(wait/total*100) + '%';
+  document.getElementById(p+'totalCount').textContent   = total;
+  document.getElementById(p+'approveCount').textContent = approve;
+  document.getElementById(p+'warningCount').textContent = warning;
+  document.getElementById(p+'waitCount').textContent    = wait;
+  document.getElementById(p+'approvePct').textContent   = total ? Math.round(approve/total*100)+'%' : '—%';
+  document.getElementById(p+'warningPct').textContent   = total ? Math.round(warning/total*100)+'%' : '—%';
+  document.getElementById(p+'waitPct').textContent      = total ? Math.round(wait/total*100)+'%' : '—%';
 
-  document.getElementById('progressApprove').style.width = (approve/total*100) + '%';
-  document.getElementById('progressWarning').style.width = (warning/total*100) + '%';
-  document.getElementById('progressWait').style.width = (wait/total*100) + '%';
-  document.getElementById('progressText').textContent = `${approve + warning}/${total} docs inspected`;
+  document.getElementById(p+'progressApprove').style.width = total ? (approve/total*100)+'%' : '0%';
+  document.getElementById(p+'progressWarning').style.width = total ? (warning/total*100)+'%' : '0%';
+  document.getElementById(p+'progressWait').style.width    = total ? (wait/total*100)+'%' : '100%';
+  document.getElementById(p+'progressText').textContent    = `${approve+warning}/${total} docs inspected`;
 
-  // Warning list
-  const warnDocs = allData.filter(r => r.printStatus.includes('WARNING'));
+  const warnDocs = data.filter(r => String(r.printStatus).toUpperCase().includes('WARNING'));
+  const warnSec  = document.getElementById(p+'warningSection');
   if (warnDocs.length > 0) {
-    document.getElementById('warningSection').style.display = 'block';
-    document.getElementById('warningBadge').textContent = warnDocs.length;
-    document.getElementById('warningList').innerHTML = warnDocs.map(r => `
+    warnSec.style.display = 'block';
+    document.getElementById(p+'warningBadge').textContent = warnDocs.length;
+    document.getElementById(p+'warningList').innerHTML = warnDocs.map(r => `
       <div class="warning-item">
         <span class="warning-icon">⚠️</span>
         <span class="warning-doc">${r.doc}</span>
-      </div>
-    `).join('');
+      </div>`).join('');
+  } else {
+    warnSec.style.display = 'none';
   }
 }
 
-// === FILTER & SEARCH ===
-function setFilter(f, btn) {
-  currentFilter = f;
-  currentPage = 1;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  filterData();
+function updateChips() {
+  const mTotal = state.MIR.data.length;
+  const wTotal = state.WIR.data.length;
+  document.getElementById('mirChip').textContent = mTotal || '—';
+  document.getElementById('wirChip').textContent = wTotal || '—';
 }
 
-function filterData() {
-  const search = document.getElementById('searchBox').value.toLowerCase();
-  filteredData = allData.filter(r => {
-    const matchFilter =
-      currentFilter === 'all' ? true :
-      currentFilter === 'approve' ? r.printStatus.includes('APPROVE') :
-      currentFilter === 'warning' ? r.printStatus.includes('WARNING') :
-      !r.printStatus.includes('APPROVE') && !r.printStatus.includes('WARNING');
-    const matchSearch = !search || r.doc.toLowerCase().includes(search) || r.category.toLowerCase().includes(search);
-    return matchFilter && matchSearch;
+// ═══════════════════════════════════════════
+// FILTER & SEARCH
+// ═══════════════════════════════════════════
+function setFilter(tab, f, btn) {
+  state[tab].filter = f;
+  state[tab].page   = 1;
+  const prefix   = tab === 'MIR' ? '#viewMIR' : '#viewWIR';
+  document.querySelectorAll(prefix + ' .filter-tab').forEach(t => {
+    t.classList.remove('active', 'active-wir-tab');
   });
-  currentPage = 1;
-  renderTable();
+  btn.classList.add(tab === 'WIR' ? 'active-wir-tab' : 'active');
+  filterData(tab);
 }
 
-// === TABLE ===
-function renderTable() {
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const pageData = filteredData.slice(start, start + PAGE_SIZE);
+function filterData(tab) {
+  const search = document.getElementById(tab.toLowerCase()+'-searchBox').value.toLowerCase();
+  const f = state[tab].filter;
+  state[tab].filtered = state[tab].data.filter(r => {
+    const s = String(r.printStatus).toUpperCase();
+    const matchFilter =
+      f === 'all'     ? true :
+      f === 'approve' ? s.includes('APPROVE') :
+      f === 'warning' ? s.includes('WARNING') :
+      !s.includes('APPROVE') && !s.includes('WARNING');
+    const searchFields = tab === 'MIR'
+      ? (r.doc + r.category).toLowerCase()
+      : (r.doc + r.room + r.equipment).toLowerCase();
+    return matchFilter && (!search || searchFields.includes(search));
+  });
+  state[tab].page = 1;
+  renderTable(tab);
+}
 
-  if (pageData.length === 0) {
-    document.getElementById('tableBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-dim);font-family:var(--mono);">ไม่พบข้อมูล</td></tr>`;
-  } else {
-    document.getElementById('tableBody').innerHTML = pageData.map((r, i) => `
+// ═══════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════
+function renderTable(tab) {
+  const p      = tab.toLowerCase() + '-';
+  const s      = state[tab];
+  const start  = (s.page - 1) * PAGE_SIZE;
+  const page   = s.filtered.slice(start, start + PAGE_SIZE);
+  const tbody  = document.getElementById(p+'tableBody');
+  const colSpan = tab === 'MIR' ? 7 : 8;
+
+  if (page.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center;padding:32px;color:var(--text-dim);font-family:var(--mono);">ไม่พบข้อมูล</td></tr>`;
+  } else if (tab === 'MIR') {
+    tbody.innerHTML = page.map((r, i) => `
       <tr>
         <td style="color:var(--text-dim);font-family:var(--mono);font-size:11px;">${r.no || (start+i+1)}</td>
         <td><span class="doc-no">${r.doc}</span></td>
@@ -536,45 +737,60 @@ function renderTable() {
         <td><span class="discipline-badge">${r.discipline}</span></td>
         <td style="font-size:12px;color:var(--text-dim);">${r.category}</td>
         <td>${statusBadge(r.printStatus)}</td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
+  } else {
+    tbody.innerHTML = page.map((r, i) => `
+      <tr>
+        <td style="color:var(--text-dim);font-family:var(--mono);font-size:11px;">${r.no || (start+i+1)}</td>
+        <td><span class="doc-no-wir">${r.doc}</span></td>
+        <td><span class="room-badge">${r.room || '—'}</span></td>
+        <td><span class="equip-badge">${r.equipment || '—'}</span></td>
+        <td style="font-size:12px;">${r.building || '—'}</td>
+        <td><span class="discipline-badge">${r.discipline || '—'}</span></td>
+        <td class="date-cell">${r.inspectDate || '—'}</td>
+        <td>${statusBadge(r.printStatus)}</td>
+      </tr>`).join('');
   }
 
-  renderPagination();
-  document.getElementById('paginationInfo').textContent = `แสดง ${Math.min(start+1, filteredData.length)}–${Math.min(start+PAGE_SIZE, filteredData.length)} จาก ${filteredData.length} docs`;
+  renderPagination(tab);
+  document.getElementById(p+'paginationInfo').textContent =
+    `แสดง ${Math.min(start+1, s.filtered.length)}–${Math.min(start+PAGE_SIZE, s.filtered.length)} จาก ${s.filtered.length} docs`;
 }
 
 function statusBadge(s) {
-  if (s.includes('APPROVE')) return `<span class="status-badge status-approve">✅ ไม่ต้องปริ้น</span>`;
-  if (s.includes('WARNING')) return `<span class="status-badge status-warning">⚠️ แก้ก่อน</span>`;
+  const u = String(s).toUpperCase();
+  if (u.includes('APPROVE')) return `<span class="status-badge status-approve">✅ ไม่ต้องปริ้น</span>`;
+  if (u.includes('WARNING')) return `<span class="status-badge status-warning">⚠️ แก้ก่อน</span>`;
   return `<span class="status-badge status-wait">รอ</span>`;
 }
 
-function renderPagination() {
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-  const container = document.getElementById('pageBtns');
-  let html = `<button class="page-btn" onclick="changePage(${currentPage-1})" ${currentPage===1?'disabled':''}>←</button>`;
-  for (let p = 1; p <= totalPages; p++) {
-    if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
-      html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="changePage(${p})">${p}</button>`;
-    } else if (Math.abs(p - currentPage) === 2) {
+function renderPagination(tab) {
+  const p    = tab.toLowerCase() + '-';
+  const s    = state[tab];
+  const total = Math.ceil(s.filtered.length / PAGE_SIZE);
+  const cur   = s.page;
+  let html = `<button class="page-btn" onclick="changePage('${tab}',${cur-1})" ${cur===1?'disabled':''}>←</button>`;
+  for (let pg = 1; pg <= total; pg++) {
+    if (pg === 1 || pg === total || Math.abs(pg - cur) <= 1) {
+      html += `<button class="page-btn ${pg===cur?'active':''}" onclick="changePage('${tab}',${pg})">${pg}</button>`;
+    } else if (Math.abs(pg - cur) === 2) {
       html += `<span style="color:var(--text-dim);padding:0 4px;font-size:12px;">…</span>`;
     }
   }
-  html += `<button class="page-btn" onclick="changePage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>→</button>`;
-  container.innerHTML = html;
+  html += `<button class="page-btn" onclick="changePage('${tab}',${cur+1})" ${cur===total||total===0?'disabled':''}>→</button>`;
+  document.getElementById(p+'pageBtns').innerHTML = html;
 }
 
-function changePage(p) {
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-  if (p < 1 || p > totalPages) return;
-  currentPage = p;
-  renderTable();
+function changePage(tab, p) {
+  const total = Math.ceil(state[tab].filtered.length / PAGE_SIZE);
+  if (p < 1 || p > total) return;
+  state[tab].page = p;
+  renderTable(tab);
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-// Init
-loadData();
+// ── Init ──
+loadData('MIR');
 </script>
 </body>
 </html>
