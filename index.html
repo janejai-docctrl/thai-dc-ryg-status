@@ -91,6 +91,8 @@
     color: var(--wir-accent);
     border-bottom-color: var(--wir-accent);
   }
+  .tab-btn.active-mir-track { color: #2563eb; border-bottom-color: #2563eb; }
+  .tab-btn.active-wir-track { color: #7c3aed; border-bottom-color: #7c3aed; }
   .tab-chip {
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px;
@@ -98,6 +100,11 @@
   }
   .chip-mir { background: rgba(0,194,255,0.12); color: var(--accent); }
   .chip-wir { background: rgba(167,139,250,0.12); color: var(--wir-accent); }
+  .chip-mir-track { background: rgba(37,99,235,0.15); color: #2563eb; }
+  .chip-wir-track { background: rgba(124,58,237,0.15); color: #7c3aed; }
+  .tab-divider {
+    width: 1px; height: 20px; background: var(--border); margin: 0 4px;
+  }
 
   /* ── Main ── */
   .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
@@ -285,11 +292,87 @@
     margin-top: 32px;
   }
 
+  /* ══════════════════════════════════════════ */
+  /* TRACKING TABS — Light Theme               */
+  /* ══════════════════════════════════════════ */
+
+  .track-outer {
+    min-height: calc(100vh - 120px);
+    background: #f1f5f9;
+  }
+  .track-wrap { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+  .track-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .track-head-title { font-size: 17px; font-weight: 700; color: #1e293b; font-family: var(--mono); }
+  .track-head-sub { font-size: 12px; color: #64748b; font-family: var(--mono); margin-top: 3px; }
+  .track-refresh { border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--sans); color: #fff; }
+  .tr-mir { background: #2563eb; }
+  .tr-wir { background: #7c3aed; }
+
+  .track-summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  .track-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden; }
+  .track-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .tc-total-mir::before { background: #2563eb; }
+  .tc-total-wir::before { background: #7c3aed; }
+  .tc-approve::before  { background: #10b981; }
+  .tc-warning::before  { background: #ef4444; }
+  .tc-pending::before  { background: #94a3b8; }
+  .track-card-label { font-size: 11px; color: #64748b; font-family: var(--mono); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .track-card-value { font-size: 38px; font-weight: 700; font-family: var(--mono); line-height: 1; }
+  .tc-total-mir .track-card-value { color: #2563eb; }
+  .tc-total-wir .track-card-value { color: #7c3aed; }
+  .tc-approve .track-card-value   { color: #10b981; }
+  .tc-warning .track-card-value   { color: #ef4444; }
+  .tc-pending .track-card-value   { color: #94a3b8; }
+  .track-card-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+  .track-card-pct { position: absolute; bottom: 12px; right: 12px; font-family: var(--mono); font-size: 11px; color: #94a3b8; background: #f8fafc; padding: 2px 7px; border-radius: 4px; }
+
+  .track-prog-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+  .track-prog-lbl { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; margin-bottom: 8px; font-family: var(--mono); }
+  .track-prog-bar { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; display: flex; }
+  .tp-approve { background: #10b981; transition: width .8s; }
+  .tp-warning  { background: #ef4444; transition: width .8s; }
+  .tp-pending  { background: #e2e8f0; transition: width .8s; }
+  .track-legend { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; font-family: var(--mono); color: #64748b; }
+  .tdot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+  .track-table-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+  .track-tbl-hdr { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+  .track-tbl-title { font-size: 12px; font-weight: 600; color: #475569; font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; }
+  .track-search { background: #fff; border: 1px solid #e2e8f0; padding: 6px 11px; border-radius: 6px; color: #1e293b; font-family: var(--mono); font-size: 12px; width: 220px; outline: none; }
+  .track-search:focus { border-color: #2563eb; }
+  .ttbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ttbl thead tr { background: #f8fafc; }
+  .ttbl th { padding: 9px 13px; text-align: left; font-family: var(--mono); font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e2e8f0; font-weight: 500; white-space: nowrap; }
+  .ttbl td { padding: 8px 13px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
+  .ttbl tr:last-child td { border-bottom: none; }
+  .ttbl tr:hover td { background: #f8fafc; }
+  .t-doc-mir { font-family: var(--mono); font-size: 11px; color: #2563eb; font-weight: 600; }
+  .t-doc-wir { font-family: var(--mono); font-size: 11px; color: #7c3aed; font-weight: 600; }
+  .t-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 3px; white-space: nowrap; display: inline-block; }
+  .tb-approved   { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .tb-warning    { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .tb-pending    { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+  .tb-rejected   { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+  .t-date { font-family: var(--mono); font-size: 10px; color: #94a3b8; }
+  .track-err { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 8px; font-family: var(--mono); font-size: 12px; margin-bottom: 16px; display: none; }
+  .track-page-row { padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; font-family: var(--mono); background: #f8fafc; }
+  .tpb { display: flex; gap: 4px; }
+  .tp-btn { padding: 4px 9px; border-radius: 4px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; font-family: var(--mono); font-size: 11px; transition: all 0.2s; }
+  .tp-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; }
+  .tp-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .tp-btn.tp-act-mir { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .tp-btn.tp-act-wir { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+  /* light-mode footer override */
+  .footer-light { border-top-color: #e2e8f0; color: #94a3b8; background: #f1f5f9; }
+
   @media (max-width: 768px) {
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .track-summary-grid { grid-template-columns: repeat(2,1fr); }
     .main { padding: 16px; }
+    .track-wrap { padding: 16px; }
     .header { padding: 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
-    .tab-bar { padding: 0 16px; }
+    .tab-bar { padding: 0 16px; overflow-x: auto; }
   }
 </style>
 </head>
@@ -323,12 +406,19 @@
   <button class="tab-btn" id="tabWIR" onclick="switchTab('WIR')">
     WIR <span class="tab-chip chip-wir" id="wirChip">—</span>
   </button>
+  <div class="tab-divider"></div>
+  <button class="tab-btn" id="tabMIRTrack" onclick="switchTab('MIR_TRACK')">
+    MIR Tracking <span class="tab-chip chip-mir-track" id="mirTrackChip">—</span>
+  </button>
+  <button class="tab-btn" id="tabWIRTrack" onclick="switchTab('WIR_TRACK')">
+    WIR Tracking <span class="tab-chip chip-wir-track" id="wirTrackChip">—</span>
+  </button>
 </div>
 
 <!-- ══════════════════════════════════════════ -->
-<!-- MIR VIEW -->
+<!-- MIR VIEW (dark)                           -->
 <!-- ══════════════════════════════════════════ -->
-<div class="main">
+<div class="main" id="darkMain">
   <div class="view active" id="viewMIR">
     <div class="error-msg" id="errorMIR"></div>
 
@@ -419,7 +509,7 @@
   </div><!-- /viewMIR -->
 
   <!-- ══════════════════════════════════════════ -->
-  <!-- WIR VIEW -->
+  <!-- WIR VIEW (dark)                           -->
   <!-- ══════════════════════════════════════════ -->
   <div class="view" id="viewWIR">
     <div class="error-msg" id="errorWIR"></div>
@@ -510,25 +600,193 @@
       </div>
     </div>
   </div><!-- /viewWIR -->
-</div><!-- /main -->
+</div><!-- /darkMain -->
 
-<div class="footer" id="footerText">
+<!-- ══════════════════════════════════════════ -->
+<!-- MIR TRACKING VIEW (light)                 -->
+<!-- ══════════════════════════════════════════ -->
+<div id="viewMIRTrack" class="track-outer" style="display:none;">
+  <div class="track-wrap">
+    <div class="track-err" id="errMIRTrack"></div>
+    <div class="track-head">
+      <div>
+        <div class="track-head-title">MIR Tracking</div>
+        <div class="track-head-sub" id="mirt-sub">Sheet: MIR_Tracking · กำลังโหลด...</div>
+      </div>
+      <button class="track-refresh tr-mir" onclick="reloadTracking('MIR_TRACK')">↻ Refresh</button>
+    </div>
+
+    <div class="track-summary-grid">
+      <div class="track-card tc-total-mir">
+        <div class="track-card-label">Total</div>
+        <div class="track-card-value" id="mirt-total">—</div>
+        <div class="track-card-sub">ทั้งหมด</div>
+      </div>
+      <div class="track-card tc-approve">
+        <div class="track-card-label">✅ APPROVED</div>
+        <div class="track-card-value" id="mirt-approved">—</div>
+        <div class="track-card-sub">Approved</div>
+        <div class="track-card-pct" id="mirt-approvedPct">—%</div>
+      </div>
+      <div class="track-card tc-warning">
+        <div class="track-card-label">⚠️ WARNING</div>
+        <div class="track-card-value" id="mirt-warning">—</div>
+        <div class="track-card-sub">Warning / Rejected</div>
+        <div class="track-card-pct" id="mirt-warningPct">—%</div>
+      </div>
+      <div class="track-card tc-pending">
+        <div class="track-card-label">⏳ PENDING</div>
+        <div class="track-card-value" id="mirt-pending">—</div>
+        <div class="track-card-sub">รอดำเนินการ</div>
+        <div class="track-card-pct" id="mirt-pendingPct">—%</div>
+      </div>
+    </div>
+
+    <div class="track-prog-wrap">
+      <div class="track-prog-lbl">
+        <span>MIR Tracking Progress</span>
+        <span id="mirt-progText">—</span>
+      </div>
+      <div class="track-prog-bar">
+        <div class="tp-approve" id="mirt-progApprove" style="width:0%"></div>
+        <div class="tp-warning"  id="mirt-progWarning"  style="width:0%"></div>
+        <div class="tp-pending"  id="mirt-progPending"  style="width:100%"></div>
+      </div>
+      <div class="track-legend">
+        <span><span class="tdot" style="background:#10b981"></span>Approved</span>
+        <span><span class="tdot" style="background:#ef4444"></span>Warning / Rejected</span>
+        <span><span class="tdot" style="background:#e2e8f0"></span>Pending</span>
+      </div>
+    </div>
+
+    <div class="track-table-wrap">
+      <div class="track-tbl-hdr">
+        <span class="track-tbl-title">MIR Tracking Data</span>
+        <input class="track-search" id="mirt-search" placeholder="ค้นหา..." oninput="trackSearch('MIR_TRACK')">
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ttbl">
+          <thead id="mirt-thead"></thead>
+          <tbody id="mirt-tbody">
+            <tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="track-page-row">
+        <span id="mirt-pageInfo">—</span>
+        <div class="tpb" id="mirt-pageBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- WIR TRACKING VIEW (light)                 -->
+<!-- ══════════════════════════════════════════ -->
+<div id="viewWIRTrack" class="track-outer" style="display:none;">
+  <div class="track-wrap">
+    <div class="track-err" id="errWIRTrack"></div>
+    <div class="track-head">
+      <div>
+        <div class="track-head-title">WIR Tracking</div>
+        <div class="track-head-sub" id="wirt-sub">Sheet: WIR_Tracking · กำลังโหลด...</div>
+      </div>
+      <button class="track-refresh tr-wir" onclick="reloadTracking('WIR_TRACK')">↻ Refresh</button>
+    </div>
+
+    <div class="track-summary-grid">
+      <div class="track-card tc-total-wir">
+        <div class="track-card-label">Total</div>
+        <div class="track-card-value" id="wirt-total">—</div>
+        <div class="track-card-sub">ทั้งหมด</div>
+      </div>
+      <div class="track-card tc-approve">
+        <div class="track-card-label">✅ APPROVED</div>
+        <div class="track-card-value" id="wirt-approved">—</div>
+        <div class="track-card-sub">Approved</div>
+        <div class="track-card-pct" id="wirt-approvedPct">—%</div>
+      </div>
+      <div class="track-card tc-warning">
+        <div class="track-card-label">⚠️ WARNING</div>
+        <div class="track-card-value" id="wirt-warning">—</div>
+        <div class="track-card-sub">Warning / Rejected</div>
+        <div class="track-card-pct" id="wirt-warningPct">—%</div>
+      </div>
+      <div class="track-card tc-pending">
+        <div class="track-card-label">⏳ PENDING</div>
+        <div class="track-card-value" id="wirt-pending">—</div>
+        <div class="track-card-sub">รอดำเนินการ</div>
+        <div class="track-card-pct" id="wirt-pendingPct">—%</div>
+      </div>
+    </div>
+
+    <div class="track-prog-wrap">
+      <div class="track-prog-lbl">
+        <span>WIR Tracking Progress</span>
+        <span id="wirt-progText">—</span>
+      </div>
+      <div class="track-prog-bar">
+        <div class="tp-approve" id="wirt-progApprove" style="width:0%"></div>
+        <div class="tp-warning"  id="wirt-progWarning"  style="width:0%"></div>
+        <div class="tp-pending"  id="wirt-progPending"  style="width:100%"></div>
+      </div>
+      <div class="track-legend">
+        <span><span class="tdot" style="background:#10b981"></span>Approved</span>
+        <span><span class="tdot" style="background:#ef4444"></span>Warning / Rejected</span>
+        <span><span class="tdot" style="background:#e2e8f0"></span>Pending</span>
+      </div>
+    </div>
+
+    <div class="track-table-wrap">
+      <div class="track-tbl-hdr">
+        <span class="track-tbl-title">WIR Tracking Data</span>
+        <input class="track-search" id="wirt-search" placeholder="ค้นหา..." oninput="trackSearch('WIR_TRACK')">
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="ttbl">
+          <thead id="wirt-thead"></thead>
+          <tbody id="wirt-tbody">
+            <tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="track-page-row">
+        <span id="wirt-pageInfo">—</span>
+        <div class="tpb" id="wirt-pageBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer" id="footerEl">
   THAI DC 1-RYG · Inspection Dashboard · Data source: Google Sheets · Auto-refreshes on load
 </div>
 
 <script>
 // ═══════════════════════════════════════════
-// CONFIG
+// CONFIG — existing Cover List sheets
 // ═══════════════════════════════════════════
-const SHEET_ID   = '1SmbzclWyYl7fyqc5SToZEPJk-84n4TCSk_RQor9z0x4';
-const MIR_SHEET  = 'MIR_Cover_List';
-const WIR_SHEET  = 'WIR_Cover_List';
-const PAGE_SIZE  = 30;
+const SHEET_ID  = '1SmbzclWyYl7fyqc5SToZEPJk-84n4TCSk_RQor9z0x4';
+const MIR_SHEET = 'MIR_Cover_List';
+const WIR_SHEET = 'WIR_Cover_List';
+const PAGE_SIZE = 30;
+
+// Config — new Tracking sheets (separate spreadsheets)
+const TRACK_CFG = {
+  MIR_TRACK: { id: '10EdKFSlp-HJ9u-J6GM4eaVMXoPgs-Nks6dlDoJPTqdU', sheet: 'MIR_Tracking'  },
+  WIR_TRACK: { id: '1y9_8C5-8_2EcY9fdjt_SR33hOdQwcd_wAAfTT0Kg2rw',  sheet: 'WIR_Tracking'  }
+};
+const TRACK_PAGE = 30;
 
 // ── State ──
 const state = {
   MIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false },
   WIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false }
+};
+
+const trackState = {
+  MIR_TRACK: { data: [], filtered: [], cols: [], statusCol: -1, page: 1, loaded: false },
+  WIR_TRACK: { data: [], filtered: [], cols: [], statusCol: -1, page: 1, loaded: false }
 };
 
 let activeTab = 'MIR';
@@ -538,18 +796,44 @@ let activeTab = 'MIR';
 // ═══════════════════════════════════════════
 function switchTab(tab) {
   activeTab = tab;
-  document.getElementById('viewMIR').classList.toggle('active', tab === 'MIR');
-  document.getElementById('viewWIR').classList.toggle('active', tab === 'WIR');
-  document.getElementById('tabMIR').className = 'tab-btn' + (tab === 'MIR' ? ' active-mir' : '');
-  document.getElementById('tabWIR').className = 'tab-btn' + (tab === 'WIR' ? ' active-wir' : '');
+  const isDark = tab === 'MIR' || tab === 'WIR';
 
-  if (!state[tab].loaded) loadData(tab);
+  // Show/hide containers
+  document.getElementById('darkMain').style.display   = isDark ? '' : 'none';
+  document.getElementById('viewMIRTrack').style.display = tab === 'MIR_TRACK' ? '' : 'none';
+  document.getElementById('viewWIRTrack').style.display = tab === 'WIR_TRACK' ? '' : 'none';
+
+  // Dark-mode view toggle
+  if (isDark) {
+    document.getElementById('viewMIR').classList.toggle('active', tab === 'MIR');
+    document.getElementById('viewWIR').classList.toggle('active', tab === 'WIR');
+  }
+
+  // Body background
+  document.body.style.background = isDark ? 'var(--bg)' : '#f1f5f9';
+
+  // Footer theme
+  const footer = document.getElementById('footerEl');
+  footer.className = isDark ? 'footer' : 'footer footer-light';
+
+  // Tab button highlight
+  document.getElementById('tabMIR').className      = 'tab-btn' + (tab === 'MIR'       ? ' active-mir'       : '');
+  document.getElementById('tabWIR').className      = 'tab-btn' + (tab === 'WIR'       ? ' active-wir'       : '');
+  document.getElementById('tabMIRTrack').className = 'tab-btn' + (tab === 'MIR_TRACK' ? ' active-mir-track' : '');
+  document.getElementById('tabWIRTrack').className = 'tab-btn' + (tab === 'WIR_TRACK' ? ' active-wir-track' : '');
+
+  // Load data if not already loaded
+  if (isDark  && !state[tab].loaded)       loadData(tab);
+  if (!isDark && !trackState[tab].loaded)  loadTrackingData(tab);
 }
 
-function reloadCurrent() { loadData(activeTab); }
+function reloadCurrent() {
+  if (activeTab === 'MIR' || activeTab === 'WIR') loadData(activeTab);
+  else loadTrackingData(activeTab);
+}
 
 // ═══════════════════════════════════════════
-// LOAD DATA
+// LOAD DATA — existing Cover List sheets
 // ═══════════════════════════════════════════
 async function loadData(tab) {
   const sheetName = tab === 'MIR' ? MIR_SHEET : WIR_SHEET;
@@ -585,7 +869,6 @@ async function loadData(tab) {
       }).filter(r => r.doc);
 
     } else {
-      // WIR columns: No. | Doc No. (WIR) | Room No. | Equipment_Type | Building | Discipline | Inspect_Date | Print_Status
       const colNo    = cols.findIndex(c => c === 'No.');
       const colDoc   = cols.findIndex(c => c.toLowerCase().includes('doc no') || c.toLowerCase().includes('wir'));
       const colRoom  = cols.findIndex(c => c.toLowerCase().includes('room'));
@@ -636,7 +919,69 @@ function showFallbackMIR() {
 }
 
 // ═══════════════════════════════════════════
-// SUMMARY
+// LOAD DATA — Tracking sheets
+// ═══════════════════════════════════════════
+async function loadTrackingData(tab) {
+  const cfg    = TRACK_CFG[tab];
+  const prefix = tab === 'MIR_TRACK' ? 'mirt' : 'wirt';
+  const errId  = tab === 'MIR_TRACK' ? 'errMIRTrack' : 'errWIRTrack';
+
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('loadingText').textContent = `กำลังโหลด ${cfg.sheet}...`;
+  document.getElementById('refreshBtn').disabled = true;
+  document.getElementById(errId).style.display = 'none';
+
+  try {
+    const url  = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}`;
+    const res  = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const cols = json.table.cols.map(c => c.label);
+    const rows = json.table.rows || [];
+
+    // Auto-detect status column
+    const statusCol = cols.findIndex(c => {
+      const l = c.toLowerCase();
+      return l.includes('status') || l.includes('สถานะ') || l.includes('print') ||
+             l.includes('result') || l.includes('approve') || l.includes('รายการ');
+    });
+
+    trackState[tab].cols      = cols;
+    trackState[tab].statusCol = statusCol;
+    trackState[tab].data      = rows.map(row =>
+      cols.map((_, i) => {
+        if (!row.c || !row.c[i]) return '';
+        const cell = row.c[i];
+        return cell.f != null ? cell.f : (cell.v != null ? String(cell.v) : '');
+      })
+    ).filter(r => r.some(c => c !== ''));
+
+    trackState[tab].loaded = true;
+
+    document.getElementById('lastUpdated').textContent =
+      `Updated: ${new Date().toLocaleString('th-TH', {dateStyle:'short', timeStyle:'short'})}`;
+    document.getElementById(prefix + '-sub').textContent =
+      `Sheet: ${cfg.sheet} · ${trackState[tab].data.length} rows`;
+
+    updateTrackingSummary(tab);
+    trackFilter(tab);
+    updateTrackChips();
+
+  } catch(err) {
+    console.error(err);
+    const errEl = document.getElementById(errId);
+    errEl.textContent = `❌ โหลด ${cfg.sheet} ไม่ได้: ${err.message} — ตรวจสอบว่า Spreadsheet เป็น Public`;
+    errEl.style.display = 'block';
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('refreshBtn').disabled = false;
+  }
+}
+
+function reloadTracking(tab) { loadTrackingData(tab); }
+
+// ═══════════════════════════════════════════
+// SUMMARY — Cover List
 // ═══════════════════════════════════════════
 function updateSummary(tab) {
   const p      = tab.toLowerCase() + '-';
@@ -675,14 +1020,51 @@ function updateSummary(tab) {
 }
 
 function updateChips() {
-  const mTotal = state.MIR.data.length;
-  const wTotal = state.WIR.data.length;
-  document.getElementById('mirChip').textContent = mTotal || '—';
-  document.getElementById('wirChip').textContent = wTotal || '—';
+  document.getElementById('mirChip').textContent = state.MIR.data.length || '—';
+  document.getElementById('wirChip').textContent = state.WIR.data.length || '—';
 }
 
 // ═══════════════════════════════════════════
-// FILTER & SEARCH
+// SUMMARY — Tracking sheets
+// ═══════════════════════════════════════════
+function updateTrackingSummary(tab) {
+  const s      = trackState[tab];
+  const prefix = tab === 'MIR_TRACK' ? 'mirt' : 'wirt';
+  const total  = s.data.length;
+  let approved = 0, warning = 0, pending = 0;
+
+  if (s.statusCol >= 0) {
+    s.data.forEach(row => {
+      const val = String(row[s.statusCol]).toUpperCase().trim();
+      if (val.includes('APPROV') || val.includes('CLOSE') || val.includes('COMPLET')) approved++;
+      else if (val.includes('WARN') || val.includes('REJECT') || val.includes('REVIS') || val.includes('NCR')) warning++;
+      else pending++;
+    });
+  } else {
+    pending = total;
+  }
+
+  document.getElementById(prefix+'-total').textContent       = total;
+  document.getElementById(prefix+'-approved').textContent    = approved;
+  document.getElementById(prefix+'-warning').textContent     = warning;
+  document.getElementById(prefix+'-pending').textContent     = pending;
+  document.getElementById(prefix+'-approvedPct').textContent = total ? Math.round(approved/total*100)+'%' : '—%';
+  document.getElementById(prefix+'-warningPct').textContent  = total ? Math.round(warning/total*100)+'%'  : '—%';
+  document.getElementById(prefix+'-pendingPct').textContent  = total ? Math.round(pending/total*100)+'%'  : '—%';
+
+  document.getElementById(prefix+'-progApprove').style.width = total ? (approved/total*100)+'%' : '0%';
+  document.getElementById(prefix+'-progWarning').style.width = total ? (warning/total*100)+'%'  : '0%';
+  document.getElementById(prefix+'-progPending').style.width = total ? (pending/total*100)+'%'  : '100%';
+  document.getElementById(prefix+'-progText').textContent    = `${approved}/${total} approved`;
+}
+
+function updateTrackChips() {
+  document.getElementById('mirTrackChip').textContent = trackState.MIR_TRACK.data.length || '—';
+  document.getElementById('wirTrackChip').textContent = trackState.WIR_TRACK.data.length || '—';
+}
+
+// ═══════════════════════════════════════════
+// FILTER & SEARCH — Cover List
 // ═══════════════════════════════════════════
 function setFilter(tab, f, btn) {
   state[tab].filter = f;
@@ -715,7 +1097,26 @@ function filterData(tab) {
 }
 
 // ═══════════════════════════════════════════
-// TABLE
+// FILTER & SEARCH — Tracking
+// ═══════════════════════════════════════════
+function trackFilter(tab) {
+  trackState[tab].filtered = [...trackState[tab].data];
+  trackState[tab].page = 1;
+  renderTrackingTable(tab);
+}
+
+function trackSearch(tab) {
+  const prefix = tab === 'MIR_TRACK' ? 'mirt' : 'wirt';
+  const search = document.getElementById(prefix+'-search').value.toLowerCase();
+  trackState[tab].filtered = trackState[tab].data.filter(row =>
+    row.some(cell => String(cell).toLowerCase().includes(search))
+  );
+  trackState[tab].page = 1;
+  renderTrackingTable(tab);
+}
+
+// ═══════════════════════════════════════════
+// TABLE RENDER — Cover List
 // ═══════════════════════════════════════════
 function renderTable(tab) {
   const p      = tab.toLowerCase() + '-';
@@ -786,6 +1187,70 @@ function changePage(tab, p) {
   if (p < 1 || p > total) return;
   state[tab].page = p;
   renderTable(tab);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ═══════════════════════════════════════════
+// TABLE RENDER — Tracking (all columns dynamic)
+// ═══════════════════════════════════════════
+function renderTrackingTable(tab) {
+  const s      = trackState[tab];
+  const prefix = tab === 'MIR_TRACK' ? 'mirt' : 'wirt';
+  const isMIR  = tab === 'MIR_TRACK';
+  const start  = (s.page - 1) * TRACK_PAGE;
+  const page   = s.filtered.slice(start, start + TRACK_PAGE);
+  const nCols  = s.cols.length || 1;
+
+  // Headers
+  document.getElementById(prefix+'-thead').innerHTML =
+    `<tr>${s.cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+
+  // Rows
+  const tbody = document.getElementById(prefix+'-tbody');
+  if (page.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${nCols}" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">ไม่พบข้อมูล</td></tr>`;
+  } else {
+    tbody.innerHTML = page.map((row, ri) => `
+      <tr>${row.map((cell, ci) => {
+        if (ci === s.statusCol) return `<td>${trackBadge(cell)}</td>`;
+        if (ci === 0)           return `<td><span class="${isMIR ? 't-doc-mir' : 't-doc-wir'}">${cell}</span></td>`;
+        return `<td>${cell !== '' ? cell : '—'}</td>`;
+      }).join('')}</tr>`).join('');
+  }
+
+  // Pagination
+  const totalPages = Math.ceil(s.filtered.length / TRACK_PAGE);
+  const cur        = s.page;
+  const actClass   = isMIR ? 'tp-act-mir' : 'tp-act-wir';
+  let phtml = `<button class="tp-btn" onclick="changeTrackPage('${tab}',${cur-1})" ${cur===1?'disabled':''}>←</button>`;
+  for (let pg = 1; pg <= totalPages; pg++) {
+    if (pg === 1 || pg === totalPages || Math.abs(pg - cur) <= 1) {
+      phtml += `<button class="tp-btn ${pg===cur ? actClass : ''}" onclick="changeTrackPage('${tab}',${pg})">${pg}</button>`;
+    } else if (Math.abs(pg - cur) === 2) {
+      phtml += `<span style="color:#94a3b8;padding:0 3px;font-size:11px;">…</span>`;
+    }
+  }
+  phtml += `<button class="tp-btn" onclick="changeTrackPage('${tab}',${cur+1})" ${cur>=totalPages||totalPages===0?'disabled':''}>→</button>`;
+  document.getElementById(prefix+'-pageBtns').innerHTML = phtml;
+  document.getElementById(prefix+'-pageInfo').textContent =
+    `แสดง ${Math.min(start+1, s.filtered.length)}–${Math.min(start+TRACK_PAGE, s.filtered.length)} จาก ${s.filtered.length} rows`;
+}
+
+function trackBadge(val) {
+  const u = String(val).toUpperCase().trim();
+  if (!u || u === '-' || u === '—')                                               return `<span class="t-badge tb-pending">PENDING</span>`;
+  if (u.includes('APPROV') || u.includes('CLOSE') || u.includes('COMPLET'))      return `<span class="t-badge tb-approved">${val}</span>`;
+  if (u.includes('WARN'))                                                          return `<span class="t-badge tb-warning">${val}</span>`;
+  if (u.includes('REJECT') || u.includes('REVIS') || u.includes('NCR'))          return `<span class="t-badge tb-rejected">${val}</span>`;
+  return `<span class="t-badge tb-pending">${val}</span>`;
+}
+
+function changeTrackPage(tab, p) {
+  const s     = trackState[tab];
+  const total = Math.ceil(s.filtered.length / TRACK_PAGE);
+  if (p < 1 || p > total) return;
+  s.page = p;
+  renderTrackingTable(tab);
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
