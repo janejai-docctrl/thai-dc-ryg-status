@@ -290,6 +290,13 @@
   .tb-warning  { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
   .tb-pending  { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
 
+  /* File name cell */
+  .t-file {
+    font-family: var(--mono); font-size: 10px; color: #334155;
+    max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; display: inline-block; cursor: default; vertical-align: middle;
+  }
+
   /* Drive link button */
   .drive-btn {
     display: inline-flex; align-items: center; gap: 3px;
@@ -1024,13 +1031,22 @@ function renderTrackingTable(tab) {
 
   // Visible column indices (exclude hidden, but include Drive_Link)
   const visCols=cols.map((label,i)=>({label,i})).filter(({label})=>!hide.has(label));
+
+  // Inject virtual FILE column (from 'filename' col) just before Drive_Link
+  const fileColIdx=cols.findIndex(c=>c==='filename');
+  const driveColPos=visCols.findIndex(({label})=>label===DRIVE_COL);
+  const fileEntry={label:'__FILE__',i:fileColIdx};
+  if(driveColPos>=0) visCols.splice(driveColPos,0,fileEntry);
+  else visCols.push(fileEntry);
+
   const nCols=visCols.length+1; // +1 for expand toggle column
 
   // Headers
   document.getElementById(prefix+'-thead').innerHTML=`<tr>
     <th style="width:18px;"></th>
     ${visCols.map(({label})=>{
-      if(label===DRIVE_COL) return '<th>Link</th>';
+      if(label==='__FILE__') return '<th>File</th>';
+      if(label===DRIVE_COL)  return '<th>Link</th>';
       return `<th>${label.replace(/_/g,' ')}</th>`;
     }).join('')}
   </tr>`;
@@ -1048,6 +1064,12 @@ function renderTrackingTable(tab) {
         <td class="expand-toggle">${isExp?'▼':'▶'}</td>
         ${visCols.map(({label,i})=>{
           const cell=row[i]??'';
+          if(label==='__FILE__'){
+            const fname=fileColIdx>=0?(row[fileColIdx]??''):'';
+            if(!fname) return '<td style="color:#94a3b8;font-family:var(--mono);font-size:10px;">—</td>';
+            const disp=fname.length>30?fname.slice(0,30)+'…':fname;
+            return `<td onclick="event.stopPropagation()"><span class="t-file" title="${fname.replace(/"/g,'&quot;')}">${disp}</span></td>`;
+          }
           if(label===DRIVE_COL){
             return cell
               ? `<td onclick="event.stopPropagation()"><a class="drive-btn" href="${cell}" target="_blank" rel="noopener">🔗 Open</a></td>`
