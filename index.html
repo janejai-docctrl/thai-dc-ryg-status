@@ -589,6 +589,7 @@
       <select class="track-filter-sel" id="mirt-fDiscipline" onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Discipline</option></select>
       <select class="track-filter-sel" id="mirt-fStatus"     onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Status</option></select>
       <select class="track-filter-sel" id="mirt-fPhase"      onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Phase</option></select>
+      <select class="track-filter-sel" id="mirt-fMonth"      onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Month</option></select>
       <input  class="track-search-inline" id="mirt-search" placeholder="ค้นหา..." oninput="applyTrackFilters('MIR_TRACK')">
       <button class="track-clear-btn" onclick="clearTrackFilters('MIR_TRACK')">✕ Clear</button>
     </div>
@@ -679,6 +680,9 @@
       <select class="track-filter-sel" id="wirt-fDiscipline" onchange="applyTrackFilters('WIR_TRACK')"><option value="">All Discipline</option></select>
       <select class="track-filter-sel" id="wirt-fStatus"     onchange="applyTrackFilters('WIR_TRACK')"><option value="">All Status</option></select>
       <select class="track-filter-sel" id="wirt-fPhase"      onchange="applyTrackFilters('WIR_TRACK')"><option value="">All Phase</option></select>
+      <select class="track-filter-sel" id="wirt-fSystem"     onchange="applyTrackFilters('WIR_TRACK')"><option value="">All System</option></select>
+      <select class="track-filter-sel" id="wirt-fWorkType"   onchange="applyTrackFilters('WIR_TRACK')"><option value="">All Work Type</option></select>
+      <select class="track-filter-sel" id="wirt-fMonth"      onchange="applyTrackFilters('WIR_TRACK')"><option value="">All Month</option></select>
       <input  class="track-search-inline" id="wirt-search" placeholder="ค้นหา..." oninput="applyTrackFilters('WIR_TRACK')">
       <button class="track-clear-btn" onclick="clearTrackFilters('WIR_TRACK')">✕ Clear</button>
     </div>
@@ -717,47 +721,146 @@ const TRACK_CFG = {
 };
 const TRACK_PAGE = 30;
 
-// Columns to hide from table (shown nowhere / too technical)
+// PascalCase → snake_case priority merge (WIR_TRACK only — MIR_TRACK has no snake_case cols)
+const SNAKE_MAP = {
+  'Doc_No':        'doc_no',
+  'Building':      'building',
+  'Discipline':    'discipline',
+  'Phase':         'phase',
+  'Status':        'status',
+  'Issue_Date':    'issue_date',
+  'Drive_Link':    'drive_link',
+  'Location':      'location',
+  'Work_Type':     'work_type',
+  'System':        'system',
+  'Punch_List':    'punch_list',
+  'Working_Date':  'working_date',
+  'Inspector_HW':  'inspector_hw',
+  'Inspector_MITR':'inspector_mitr',
+  'MITR_Result':   'mitr_result',
+  'Remarks':       'remarks',
+};
+
+// Columns to hide from table
 const TRACK_HIDE = {
   MIR_TRACK: new Set([
-    'No.', 'Submitted_By', 'n8n_Status', 'Processed_Date',
-    'Inspector_HW', 'Inspector_MITR', 'MITR_Result', 'Remarks', ''
+    'No.','Submitted_By','n8n_Status','Processed_Date',
+    'Inspector_HW','Inspector_MITR','MITR_Result','Remarks',''
   ]),
   WIR_TRACK: new Set([
-    'No.', 'Submitted_By', 'n8n_Status', 'Processed_Date',
-    'Inspector_HW', 'Inspector_MITR', 'MITR_Result', 'Remarks',
-    'filename', 'docType', 'localPath', 'sentAt', 'fileSizeMb',
-    'mainFolder', 'drive_root_id', 'new_filename', 'drive_target', 'summary',
-    // lowercase duplicate columns (AB onwards — n8n payload mirror)
+    // PascalCase cols to hide
+    'No.','Submitted_By','n8n_Status','Processed_Date',
+    'Inspector_HW','Inspector_MITR','MITR_Result','Remarks',
+    // All snake_case duplicate cols (values merged into PascalCase)
+    'filename','docType','localPath','sentAt','fileSizeMb',
+    'mainFolder','drive_root_id','new_filename','drive_target','Verify_Status',
     'doc_no','building','phase','discipline','system','work_type','equipment',
     'eq_code','location','working_date','issue_date','sub_contractor',
     'inspector_hw','inspector_mitr','mitr_result','punch_list','status',
     'print_status','remarks','doc_type','processed_date','n8n_status',
     'drive_file_id','drive_link','server_path','file_size_mb','category',
-    'eq_tags','no_of_items','inspect_date', ''
+    'eq_tags','no_of_items','inspect_date','summary',''
   ])
 };
 
-// Fields shown in the expand row (click on a data row)
+// Fields shown in expand row
 const EXPAND_FIELDS = {
-  MIR_TRACK: ['Remarks', 'Inspector_HW', 'Inspector_MITR', 'MITR_Result'],
-  WIR_TRACK: ['summary', 'Remarks', 'Inspector_HW', 'Inspector_MITR', 'MITR_Result']
+  MIR_TRACK: ['Remarks','Inspector_HW','Inspector_MITR','MITR_Result'],
+  WIR_TRACK: ['Punch_List','Location','Remarks','Inspector_HW','Inspector_MITR','MITR_Result','summary']
 };
 
 const DRIVE_COL  = 'Drive_Link';
 const STATUS_COL = 'Status';
-const DROP_COLS  = ['Building', 'Discipline', 'Status', 'Phase'];
+
+// Per-tab dropdown columns and their element ID suffixes
+const TRACK_DROP_COLS = {
+  MIR_TRACK: ['Building','Discipline','Status','Phase'],
+  WIR_TRACK: ['Building','Discipline','Status','Phase','System','Work_Type']
+};
+const DROP_ID_SFX = {
+  Building:'fBuilding', Discipline:'fDiscipline', Status:'fStatus',
+  Phase:'fPhase', System:'fSystem', Work_Type:'fWorkType'
+};
+
+// Column used for month filter per tab
+const MONTH_COL = { MIR_TRACK:'Inspect_Date', WIR_TRACK:'Issue_Date' };
 
 // ── State ──
 const state = {
-  MIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false },
-  WIR: { data: [], filtered: [], filter: 'all', page: 1, loaded: false }
+  MIR: { data:[], filtered:[], filter:'all', page:1, loaded:false },
+  WIR: { data:[], filtered:[], filter:'all', page:1, loaded:false }
 };
 const trackState = {
-  MIR_TRACK: { data: [], filtered: [], cols: [], page: 1, expandedIdx: -1, loaded: false },
-  WIR_TRACK: { data: [], filtered: [], cols: [], page: 1, expandedIdx: -1, loaded: false }
+  MIR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false },
+  WIR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false }
 };
 let activeTab = 'MIR';
+
+// ═══════════════════════════════════════════════════════
+// DATE HELPERS
+// ═══════════════════════════════════════════════════════
+const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtDate(val) {
+  if (val == null || val === '') return '';
+  const s = String(val).trim();
+  if (!s || s === '-' || s === '—') return s;
+  // Excel numeric serial (e.g. 45234)
+  const n = parseFloat(s);
+  if (!isNaN(n) && n > 1000 && /^\d+(\.\d+)?$/.test(s)) {
+    const d = new Date(Math.round((n - 25569) * 86400000));
+    return `${String(d.getUTCDate()).padStart(2,'0')}-${MON3[d.getUTCMonth()]}-${String(d.getUTCFullYear()).slice(-2)}`;
+  }
+  return s;
+}
+
+// Extract YYYY-MM string from a date value for month grouping
+function toYearMonth(val) {
+  const s = fmtDate(val);
+  if (!s) return '';
+  // DD-MMM-YY or DD-MMM-YYYY
+  const m1 = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+  if (m1) {
+    const yr = m1[3].length === 2 ? (parseInt(m1[3]) > 50 ? '19'+m1[3] : '20'+m1[3]) : m1[3];
+    const mo = String(MON3.findIndex(x=>x.toLowerCase()===m1[2].toLowerCase())+1).padStart(2,'0');
+    return `${yr}-${mo}`;
+  }
+  // YYYY-MM-DD
+  const m2 = s.match(/^(\d{4})-(\d{2})/);
+  if (m2) return `${m2[1]}-${m2[2]}`;
+  // DD/MM/YYYY or similar
+  const m3 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (m3) return `${m3[3]}-${String(m3[2]).padStart(2,'0')}`;
+  return '';
+}
+
+function fmtYearMonth(ym) {
+  const [yr, mo] = (ym||'').split('-');
+  if (!yr || !mo) return ym||'';
+  return `${MON3[parseInt(mo)-1]} ${yr}`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SNAKE→PASCAL MERGE (WIR_TRACK only)
+// If snake_case col has a non-empty value, write it into the PascalCase col
+// ═══════════════════════════════════════════════════════
+function mergeSnakeToPascal(rows, cols) {
+  const pairs = [];
+  Object.entries(SNAKE_MAP).forEach(([pascal, snake]) => {
+    const pi = cols.findIndex(c => c === pascal);
+    const si = cols.findIndex(c => c === snake);
+    if (pi >= 0 && si >= 0) pairs.push([pi, si]);
+  });
+  if (!pairs.length) return rows;
+  return rows.map(row => {
+    const r = [...row];
+    pairs.forEach(([pi, si]) => {
+      const sv = String(r[si] ?? '').trim();
+      if (sv && sv !== '-' && sv !== '—') r[pi] = sv;
+    });
+    return r;
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // STATUS CATEGORISATION
@@ -765,8 +868,8 @@ let activeTab = 'MIR';
 function catStatus(val) {
   const u = String(val ?? '').toUpperCase().trim();
   if (!u || u === '-' || u === '—' || u === 'PENDING') return 'pending';
-  if (u.includes('WITH_COMMENT')) return 'awc';          // check before generic APPROV
-  if (u.startsWith('APPROV'))     return 'approved';
+  if (u.includes('WITH_COMMENT') || u.includes('WITH COMMENT')) return 'awc';
+  if (u.startsWith('APPROV')) return 'approved';
   if (u.includes('WARNING') || u.includes('REJECT') || u.includes('NCR') || u.includes('FAIL')) return 'warning';
   return 'pending';
 }
@@ -787,7 +890,7 @@ function trackBadge(val) {
 function switchTab(tab) {
   activeTab = tab;
   const isDark = tab === 'MIR' || tab === 'WIR';
-  document.getElementById('darkMain').style.display      = isDark          ? '' : 'none';
+  document.getElementById('darkMain').style.display      = isDark           ? '' : 'none';
   document.getElementById('viewMIRTrack').style.display  = tab==='MIR_TRACK'? '' : 'none';
   document.getElementById('viewWIRTrack').style.display  = tab==='WIR_TRACK'? '' : 'none';
   if (isDark) {
@@ -801,8 +904,8 @@ function switchTab(tab) {
   document.getElementById('tabWIR').className      = 'tab-btn'+(tab==='WIR'       ?' active-wir'      :'');
   document.getElementById('tabMIRTrack').className = 'tab-btn'+(tab==='MIR_TRACK' ?' active-mir-track':'');
   document.getElementById('tabWIRTrack').className = 'tab-btn'+(tab==='WIR_TRACK' ?' active-wir-track':'');
-  if (isDark && !state[tab].loaded)          loadData(tab);
-  if (!isDark && !trackState[tab].loaded)    loadTrackingData(tab);
+  if (isDark && !state[tab].loaded)       loadData(tab);
+  if (!isDark && !trackState[tab].loaded) loadTrackingData(tab);
 }
 
 function reloadCurrent() {
@@ -871,18 +974,21 @@ async function loadTrackingData(tab) {
     const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
     const cols = json.table.cols.map(c=>c.label);
     const rows = json.table.rows||[];
-    trackState[tab].cols = cols;
-    trackState[tab].data = rows.map(row=>
+    let rawRows = rows.map(row=>
       cols.map((_,i)=>{
         if(!row.c||!row.c[i]) return '';
         const cell=row.c[i];
-        return cell.f!=null?cell.f:(cell.v!=null?String(cell.v):'');
+        return cell.f!=null?cell.f:(cell.v!=null?fmtDate(String(cell.v)):'');
       })
     ).filter(r=>r.some(c=>c!==''));
+    // WIR_TRACK: merge snake_case values into PascalCase columns
+    if (tab==='WIR_TRACK') rawRows = mergeSnakeToPascal(rawRows, cols);
+    trackState[tab].cols = cols;
+    trackState[tab].data = rawRows;
     trackState[tab].loaded      = true;
     trackState[tab].expandedIdx = -1;
     document.getElementById('lastUpdated').textContent = `Updated: ${new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}`;
-    document.getElementById(prefix+'-sub').textContent  = `Sheet: ${cfg.sheet} · ${trackState[tab].data.length} rows`;
+    document.getElementById(prefix+'-sub').textContent = `Sheet: ${cfg.sheet} · ${rawRows.length} rows`;
     updateTrackingSummary(tab);
     populateDropdowns(tab);
     applyTrackFilters(tab);
@@ -965,39 +1071,60 @@ function updateTrackChips() {
 }
 
 // ═══════════════════════════════════════════════════════
-// DROPDOWNS — populate unique values
+// DROPDOWNS — populate unique values (including Month)
 // ═══════════════════════════════════════════════════════
 function populateDropdowns(tab) {
   const s=trackState[tab], cols=s.cols;
   const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
-  const idMap={Building:prefix+'-fBuilding',Discipline:prefix+'-fDiscipline',Status:prefix+'-fStatus',Phase:prefix+'-fPhase'};
-  DROP_COLS.forEach(field=>{
+  // Standard field dropdowns
+  TRACK_DROP_COLS[tab].forEach(field=>{
     const ci=cols.findIndex(c=>c===field);
     if(ci<0) return;
-    const sel=document.getElementById(idMap[field]);
+    const sfx=DROP_ID_SFX[field];
+    const sel=document.getElementById(prefix+'-'+sfx);
     if(!sel) return;
     const cur=sel.value;
     const vals=[...new Set(s.data.map(r=>r[ci]).filter(v=>v&&v!==''))].sort();
-    sel.innerHTML=`<option value="">All ${field}</option>`+vals.map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');
+    sel.innerHTML=`<option value="">All ${field.replace(/_/g,' ')}</option>`+
+      vals.map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');
   });
+  // Month dropdown (derived from date column)
+  const monthSel=document.getElementById(prefix+'-fMonth');
+  if(monthSel){
+    const dateColName=MONTH_COL[tab];
+    const dci=cols.findIndex(c=>c===dateColName);
+    if(dci>=0){
+      const cur=monthSel.value;
+      const months=[...new Set(s.data.map(r=>toYearMonth(r[dci])).filter(v=>v))].sort();
+      monthSel.innerHTML=`<option value="">All Month</option>`+
+        months.map(ym=>`<option value="${ym}"${ym===cur?' selected':''}>${fmtYearMonth(ym)}</option>`).join('');
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════
-// FILTER — Tracking (dropdowns + search)
+// FILTER — Tracking (dropdowns + month + search)
 // ═══════════════════════════════════════════════════════
 function applyTrackFilters(tab) {
   const s=trackState[tab], cols=s.cols;
   const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
-  const idMap={Building:prefix+'-fBuilding',Discipline:prefix+'-fDiscipline',Status:prefix+'-fStatus',Phase:prefix+'-fPhase'};
   const search=(document.getElementById(prefix+'-search')?.value||'').toLowerCase();
+  // Collect dropdown filter values
   const dropVals={};
-  DROP_COLS.forEach(f=>{dropVals[f]=document.getElementById(idMap[f])?.value||'';});
+  TRACK_DROP_COLS[tab].forEach(f=>{
+    const sfx=DROP_ID_SFX[f];
+    dropVals[f]=document.getElementById(prefix+'-'+sfx)?.value||'';
+  });
+  const selMonth=document.getElementById(prefix+'-fMonth')?.value||'';
+  const dateColName=MONTH_COL[tab];
+  const dci=cols.findIndex(c=>c===dateColName);
   s.filtered=s.data.filter(row=>{
     for(const [f,v] of Object.entries(dropVals)){
       if(!v) continue;
       const ci=cols.findIndex(c=>c===f);
       if(ci>=0&&row[ci]!==v) return false;
     }
+    if(selMonth&&dci>=0&&toYearMonth(row[dci])!==selMonth) return false;
     if(search&&!row.some(cell=>String(cell).toLowerCase().includes(search))) return false;
     return true;
   });
@@ -1006,8 +1133,10 @@ function applyTrackFilters(tab) {
 }
 function clearTrackFilters(tab) {
   const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
-  ['fBuilding','fDiscipline','fStatus','fPhase'].forEach(id=>{const el=document.getElementById(prefix+'-'+id);if(el)el.value='';});
-  const sr=document.getElementById(prefix+'-search');if(sr)sr.value='';
+  ['fBuilding','fDiscipline','fStatus','fPhase','fSystem','fWorkType','fMonth'].forEach(id=>{
+    const el=document.getElementById(prefix+'-'+id); if(el) el.value='';
+  });
+  const sr=document.getElementById(prefix+'-search'); if(sr) sr.value='';
   applyTrackFilters(tab);
 }
 
@@ -1015,10 +1144,21 @@ function clearTrackFilters(tab) {
 // EXPAND ROW
 // ═══════════════════════════════════════════════════════
 function toggleExpand(tab, absIdx, event) {
-  if(event.target.closest('a,.drive-btn')) return; // don't expand on link click
+  if(event.target.closest('a,.drive-btn')) return;
   const s=trackState[tab];
   s.expandedIdx = s.expandedIdx===absIdx ? -1 : absIdx;
   renderTrackingTable(tab);
+}
+
+// ═══════════════════════════════════════════════════════
+// TRUNCATED CELL — 30 chars + full text on hover
+// ═══════════════════════════════════════════════════════
+function truncCell(val, maxLen=30) {
+  const s=String(val??'').trim();
+  if(!s) return '<span style="color:#94a3b8">—</span>';
+  const esc=s.replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  if(s.length<=maxLen) return `<span title="${esc}">${esc}</span>`;
+  return `<span title="${esc}" style="cursor:help">${s.slice(0,maxLen).replace(/</g,'&lt;')}…</span>`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1029,19 +1169,19 @@ function renderTrackingTable(tab) {
   const cols=s.cols, hide=TRACK_HIDE[tab], expandFields=EXPAND_FIELDS[tab];
   const start=(s.page-1)*TRACK_PAGE, page=s.filtered.slice(start,start+TRACK_PAGE);
 
-  // Visible column indices (exclude hidden, but include Drive_Link)
   const visCols=cols.map((label,i)=>({label,i})).filter(({label})=>!hide.has(label));
 
-  // Inject virtual FILE column (from 'filename' col) just before Drive_Link
+  // Inject virtual FILE column before Drive_Link (WIR has filename; MIR doesn't)
   const fileColIdx=cols.findIndex(c=>c==='filename');
-  const driveColPos=visCols.findIndex(({label})=>label===DRIVE_COL);
-  const fileEntry={label:'__FILE__',i:fileColIdx};
-  if(driveColPos>=0) visCols.splice(driveColPos,0,fileEntry);
-  else visCols.push(fileEntry);
+  if(fileColIdx>=0){
+    const drivePos=visCols.findIndex(({label})=>label===DRIVE_COL);
+    const fileEntry={label:'__FILE__',i:fileColIdx};
+    if(drivePos>=0) visCols.splice(drivePos,0,fileEntry);
+    else visCols.push(fileEntry);
+  }
 
-  const nCols=visCols.length+1; // +1 for expand toggle column
+  const nCols=visCols.length+1;
 
-  // Headers
   document.getElementById(prefix+'-thead').innerHTML=`<tr>
     <th style="width:18px;"></th>
     ${visCols.map(({label})=>{
@@ -1051,7 +1191,6 @@ function renderTrackingTable(tab) {
     }).join('')}
   </tr>`;
 
-  // Rows
   const tbody=document.getElementById(prefix+'-tbody');
   if(page.length===0){
     tbody.innerHTML=`<tr><td colspan="${nCols}" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">ไม่พบข้อมูล</td></tr>`;
@@ -1063,20 +1202,21 @@ function renderTrackingTable(tab) {
       html+=`<tr class="ttrack-row${isExp?' trow-expanded':''}" onclick="toggleExpand('${tab}',${absIdx},event)">
         <td class="expand-toggle">${isExp?'▼':'▶'}</td>
         ${visCols.map(({label,i})=>{
-          const cell=row[i]??'';
+          const cell=String(row[i]??'');
           if(label==='__FILE__'){
-            const fname=fileColIdx>=0?(row[fileColIdx]??''):'';
+            const fname=String(row[fileColIdx]??'');
             if(!fname) return '<td style="color:#94a3b8;font-family:var(--mono);font-size:10px;">—</td>';
             const disp=fname.length>30?fname.slice(0,30)+'…':fname;
             return `<td onclick="event.stopPropagation()"><span class="t-file" title="${fname.replace(/"/g,'&quot;')}">${disp}</span></td>`;
           }
           if(label===DRIVE_COL){
             return cell
-              ? `<td onclick="event.stopPropagation()"><a class="drive-btn" href="${cell}" target="_blank" rel="noopener">🔗 Open</a></td>`
-              : '<td style="color:#94a3b8">—</td>';
+              ?`<td onclick="event.stopPropagation()"><a class="drive-btn" href="${cell}" target="_blank" rel="noopener">🔗 Open</a></td>`
+              :'<td style="color:#94a3b8">—</td>';
           }
           if(label===STATUS_COL||label==='Print_Status') return `<td>${trackBadge(cell)}</td>`;
           if(label==='Doc_No') return `<td><span class="${isMIR?'t-doc-mir':'t-doc-wir'}">${cell||'—'}</span></td>`;
+          if(label==='Location'||label==='Punch_List') return `<td>${truncCell(cell,30)}</td>`;
           return `<td>${cell!==''?cell:'—'}</td>`;
         }).join('')}
       </tr>`;
@@ -1095,7 +1235,6 @@ function renderTrackingTable(tab) {
     tbody.innerHTML=html;
   }
 
-  // Pagination
   const totalPg=Math.ceil(s.filtered.length/TRACK_PAGE), cur=s.page;
   const actCls=isMIR?'tp-act-mir':'tp-act-wir';
   let phtml=`<button class="tp-btn" onclick="changeTrackPage('${tab}',${cur-1})" ${cur===1?'disabled':''}>←</button>`;
