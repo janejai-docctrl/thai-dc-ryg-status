@@ -589,6 +589,7 @@
       <select class="track-filter-sel" id="mirt-fDiscipline" onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Discipline</option></select>
       <select class="track-filter-sel" id="mirt-fStatus"     onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Status</option></select>
       <select class="track-filter-sel" id="mirt-fPhase"      onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Phase</option></select>
+      <select class="track-filter-sel" id="mirt-fEquipment" onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Equipment</option></select>
       <select class="track-filter-sel" id="mirt-fMonth"      onchange="applyTrackFilters('MIR_TRACK')"><option value="">All Month</option></select>
       <input  class="track-search-inline" id="mirt-search" placeholder="ค้นหา..." oninput="applyTrackFilters('MIR_TRACK')">
       <button class="track-clear-btn" onclick="clearTrackFilters('MIR_TRACK')">✕ Clear</button>
@@ -745,7 +746,8 @@ const SNAKE_MAP = {
 const TRACK_HIDE = {
   MIR_TRACK: new Set([
     'No.','Submitted_By','n8n_Status','Processed_Date',
-    'Inspector_HW','Inspector_MITR','MITR_Result','Remarks',''
+    'Inspector_HW','Inspector_MITR','MITR_Result','Remarks',
+    'Category','Print_Status','filename',''
   ]),
   WIR_TRACK: new Set([
     // PascalCase cols to hide
@@ -765,7 +767,7 @@ const TRACK_HIDE = {
 
 // Fields shown in expand row
 const EXPAND_FIELDS = {
-  MIR_TRACK: ['Remarks','Inspector_HW','Inspector_MITR','MITR_Result'],
+  MIR_TRACK: ['Print_Status','Remarks','Inspector_HW','Inspector_MITR','MITR_Result'],
   WIR_TRACK: ['Punch_List','Location','Remarks','Inspector_HW','Inspector_MITR','MITR_Result','summary']
 };
 
@@ -774,12 +776,12 @@ const STATUS_COL = 'Status';
 
 // Per-tab dropdown columns and their element ID suffixes
 const TRACK_DROP_COLS = {
-  MIR_TRACK: ['Building','Discipline','Status','Phase'],
+  MIR_TRACK: ['Building','Discipline','Status','Phase','Equipment'],
   WIR_TRACK: ['Building','Discipline','Status','Phase','System','Work_Type']
 };
 const DROP_ID_SFX = {
   Building:'fBuilding', Discipline:'fDiscipline', Status:'fStatus',
-  Phase:'fPhase', System:'fSystem', Work_Type:'fWorkType'
+  Phase:'fPhase', System:'fSystem', Work_Type:'fWorkType', Equipment:'fEquipment'
 };
 
 // Column used for month filter per tab
@@ -1133,7 +1135,7 @@ function applyTrackFilters(tab) {
 }
 function clearTrackFilters(tab) {
   const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
-  ['fBuilding','fDiscipline','fStatus','fPhase','fSystem','fWorkType','fMonth'].forEach(id=>{
+  ['fBuilding','fDiscipline','fStatus','fPhase','fEquipment','fSystem','fWorkType','fMonth'].forEach(id=>{
     const el=document.getElementById(prefix+'-'+id); if(el) el.value='';
   });
   const sr=document.getElementById(prefix+'-search'); if(sr) sr.value='';
@@ -1171,7 +1173,7 @@ function renderTrackingTable(tab) {
 
   const visCols=cols.map((label,i)=>({label,i})).filter(({label})=>!hide.has(label));
 
-  // Inject virtual FILE column before Drive_Link (WIR has filename; MIR doesn't)
+  // Inject virtual FILE column before Drive_Link (both MIR and WIR have filename after n8n fix)
   const fileColIdx=cols.findIndex(c=>c==='filename');
   if(fileColIdx>=0){
     const drivePos=visCols.findIndex(({label})=>label===DRIVE_COL);
