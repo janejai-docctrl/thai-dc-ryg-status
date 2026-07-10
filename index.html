@@ -21,6 +21,8 @@
     --sans: 'Sarabun', sans-serif;
     --wir-accent: #a78bfa;
   }
+  /* NCR/DRW accent colors */
+  :root { --ncr-accent: #d97706; --drw-accent: #0d9488; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
@@ -69,6 +71,8 @@
   .tab-btn.active-wir       { color: var(--wir-accent); border-bottom-color: var(--wir-accent); }
   .tab-btn.active-mir-track { color: #2563eb; border-bottom-color: #2563eb; }
   .tab-btn.active-wir-track { color: #7c3aed; border-bottom-color: #7c3aed; }
+  .tab-btn.active-ncr-track { color: var(--ncr-accent); border-bottom-color: var(--ncr-accent); }
+  .tab-btn.active-drw-track { color: var(--drw-accent); border-bottom-color: var(--drw-accent); }
   .tab-chip {
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px;
@@ -78,6 +82,8 @@
   .chip-wir       { background: rgba(167,139,250,0.12); color: var(--wir-accent); }
   .chip-mir-track { background: rgba(37,99,235,0.15);   color: #2563eb; }
   .chip-wir-track { background: rgba(124,58,237,0.15);  color: #7c3aed; }
+  .chip-ncr-track { background: rgba(217,119,6,0.15);   color: var(--ncr-accent); }
+  .chip-drw-track { background: rgba(13,148,136,0.15);  color: var(--drw-accent); }
   .tab-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 
   /* ── Dark Main ── */
@@ -204,6 +210,8 @@
   .track-refresh { border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--sans); color: #fff; }
   .tr-mir { background: #2563eb; }
   .tr-wir { background: #7c3aed; }
+  .tr-ncr { background: var(--ncr-accent); }
+  .tr-drw { background: var(--drw-accent); }
 
   /* 5-column summary grid */
   .track-summary-5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 20px; }
@@ -211,6 +219,8 @@
   .track-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
   .tc-total-mir::before { background: #2563eb; }
   .tc-total-wir::before { background: #7c3aed; }
+  .tc-total-ncr::before { background: var(--ncr-accent); }
+  .tc-total-drw::before { background: var(--drw-accent); }
   .tc-approve::before   { background: #10b981; }
   .tc-awc::before       { background: #0891b2; }
   .tc-warning::before   { background: #ef4444; }
@@ -219,6 +229,8 @@
   .track-card-value { font-size: 34px; font-weight: 700; font-family: var(--mono); line-height: 1; }
   .tc-total-mir .track-card-value { color: #2563eb; }
   .tc-total-wir .track-card-value { color: #7c3aed; }
+  .tc-total-ncr .track-card-value { color: var(--ncr-accent); }
+  .tc-total-drw .track-card-value { color: var(--drw-accent); }
   .tc-approve   .track-card-value { color: #10b981; }
   .tc-awc       .track-card-value { color: #0891b2; }
   .tc-warning   .track-card-value { color: #ef4444; }
@@ -284,6 +296,8 @@
   /* Badges (light) */
   .t-doc-mir { font-family: var(--mono); font-size: 11px; color: #2563eb; font-weight: 600; }
   .t-doc-wir { font-family: var(--mono); font-size: 11px; color: #7c3aed; font-weight: 600; }
+  .t-doc-ncr { font-family: var(--mono); font-size: 11px; color: var(--ncr-accent); font-weight: 600; }
+  .t-doc-drw { font-family: var(--mono); font-size: 11px; color: var(--drw-accent); font-weight: 600; }
   .t-badge { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 3px; white-space: nowrap; display: inline-block; font-weight: 500; }
   .tb-approved { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
   .tb-awc      { background: #cffafe; color: #0e7490; border: 1px solid #67e8f9; }
@@ -317,6 +331,8 @@
   .tp-btn:disabled { opacity: .4; cursor: not-allowed; }
   .tp-btn.tp-act-mir { background: #2563eb; color: #fff; border-color: #2563eb; }
   .tp-btn.tp-act-wir { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+  .tp-btn.tp-act-ncr { background: var(--ncr-accent); color: #fff; border-color: var(--ncr-accent); }
+  .tp-btn.tp-act-drw { background: var(--drw-accent); color: #fff; border-color: var(--drw-accent); }
 
   @media (max-width: 900px) {
     .track-summary-5 { grid-template-columns: repeat(3,1fr); }
@@ -367,6 +383,12 @@
   </button>
   <button class="tab-btn" id="tabWIRTrack" onclick="switchTab('WIR_TRACK')">
     WIR Tracking <span class="tab-chip chip-wir-track" id="wirTrackChip">—</span>
+  </button>
+  <button class="tab-btn" id="tabNCRTrack" onclick="switchTab('NCR_TRACK')">
+    NCR Tracking <span class="tab-chip chip-ncr-track" id="ncrTrackChip">—</span>
+  </button>
+  <button class="tab-btn" id="tabDRWTrack" onclick="switchTab('DRW_TRACK')">
+    DRW Tracking <span class="tab-chip chip-drw-track" id="drwTrackChip">—</span>
   </button>
 </div>
 
@@ -703,6 +725,190 @@
   </div>
 </div>
 
+<!-- ════════════════════════════════════ -->
+<!-- NCR TRACKING VIEW (light)           -->
+<!-- ════════════════════════════════════ -->
+<div id="viewNCRTrack" class="track-outer" style="display:none;">
+  <div class="track-wrap">
+    <div class="track-err" id="errNCRTrack"></div>
+    <div class="track-head">
+      <div>
+        <div class="track-head-title">NCR Tracking</div>
+        <div class="track-head-sub" id="ncrt-sub">Sheet: NCR_List · กำลังโหลด...</div>
+      </div>
+      <button class="track-refresh tr-ncr" onclick="reloadTracking('NCR_TRACK')">↻ Refresh</button>
+    </div>
+
+    <div class="track-summary-5">
+      <div class="track-card tc-total-ncr">
+        <div class="track-card-label">Total</div>
+        <div class="track-card-value" id="ncrt-total">—</div>
+        <div class="track-card-sub">ทั้งหมด</div>
+      </div>
+      <div class="track-card tc-approve">
+        <div class="track-card-label">✅ APPROVED</div>
+        <div class="track-card-value" id="ncrt-approved">—</div>
+        <div class="track-card-sub">Approved</div>
+        <div class="track-card-pct" id="ncrt-approvedPct">—%</div>
+      </div>
+      <div class="track-card tc-awc">
+        <div class="track-card-label">💬 WITH COMMENTS</div>
+        <div class="track-card-value" id="ncrt-awc">—</div>
+        <div class="track-card-sub">Approved w/ Comments</div>
+        <div class="track-card-pct" id="ncrt-awcPct">—%</div>
+      </div>
+      <div class="track-card tc-warning">
+        <div class="track-card-label">⚠️ WARNING</div>
+        <div class="track-card-value" id="ncrt-warning">—</div>
+        <div class="track-card-sub">Warning / Rejected</div>
+        <div class="track-card-pct" id="ncrt-warningPct">—%</div>
+      </div>
+      <div class="track-card tc-pending">
+        <div class="track-card-label">⏳ PENDING</div>
+        <div class="track-card-value" id="ncrt-pending">—</div>
+        <div class="track-card-sub">รอดำเนินการ</div>
+        <div class="track-card-pct" id="ncrt-pendingPct">—%</div>
+      </div>
+    </div>
+
+    <div class="track-prog-wrap">
+      <div class="track-prog-lbl">
+        <span>NCR Tracking Progress</span>
+        <span id="ncrt-progText">—</span>
+      </div>
+      <div class="track-prog-bar">
+        <div class="tp-approve" id="ncrt-progApprove" style="width:0%"></div>
+        <div class="tp-awc"     id="ncrt-progAwc"     style="width:0%"></div>
+        <div class="tp-warning" id="ncrt-progWarning"  style="width:0%"></div>
+        <div class="tp-pending" id="ncrt-progPending"  style="width:100%"></div>
+      </div>
+      <div class="track-legend">
+        <span><span class="tdot" style="background:#10b981"></span>Approved</span>
+        <span><span class="tdot" style="background:#0891b2"></span>w/ Comments</span>
+        <span><span class="tdot" style="background:#ef4444"></span>Warning</span>
+        <span><span class="tdot" style="background:#e2e8f0"></span>Pending</span>
+      </div>
+    </div>
+
+    <div class="track-filter-bar">
+      <span class="track-filter-label">Filter</span>
+      <select class="track-filter-sel" id="ncrt-fBuilding"   onchange="applyTrackFilters('NCR_TRACK')"><option value="">All Building</option></select>
+      <select class="track-filter-sel" id="ncrt-fDiscipline" onchange="applyTrackFilters('NCR_TRACK')"><option value="">All Discipline</option></select>
+      <select class="track-filter-sel" id="ncrt-fStatus"     onchange="applyTrackFilters('NCR_TRACK')"><option value="">All Status</option></select>
+      <select class="track-filter-sel" id="ncrt-fPhase"      onchange="applyTrackFilters('NCR_TRACK')"><option value="">All Phase</option></select>
+      <select class="track-filter-sel" id="ncrt-fNCRType"    onchange="applyTrackFilters('NCR_TRACK')"><option value="">All NCR Type</option></select>
+      <select class="track-filter-sel" id="ncrt-fMonth"      onchange="applyTrackFilters('NCR_TRACK')"><option value="">All Month</option></select>
+      <input  class="track-search-inline" id="ncrt-search" placeholder="ค้นหา..." oninput="applyTrackFilters('NCR_TRACK')">
+      <button class="track-clear-btn" onclick="clearTrackFilters('NCR_TRACK')">✕ Clear</button>
+    </div>
+
+    <div class="track-table-wrap">
+      <div style="overflow-x:auto;">
+        <table class="ttbl">
+          <thead id="ncrt-thead"></thead>
+          <tbody id="ncrt-tbody"><tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="track-page-row">
+        <span id="ncrt-pageInfo">—</span>
+        <div class="tpb" id="ncrt-pageBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════ -->
+<!-- DRW TRACKING VIEW (light)           -->
+<!-- ════════════════════════════════════ -->
+<div id="viewDRWTrack" class="track-outer" style="display:none;">
+  <div class="track-wrap">
+    <div class="track-err" id="errDRWTrack"></div>
+    <div class="track-head">
+      <div>
+        <div class="track-head-title">DRW Tracking</div>
+        <div class="track-head-sub" id="drwt-sub">Sheet: DRW_List · กำลังโหลด...</div>
+      </div>
+      <button class="track-refresh tr-drw" onclick="reloadTracking('DRW_TRACK')">↻ Refresh</button>
+    </div>
+
+    <div class="track-summary-5">
+      <div class="track-card tc-total-drw">
+        <div class="track-card-label">Total</div>
+        <div class="track-card-value" id="drwt-total">—</div>
+        <div class="track-card-sub">ทั้งหมด</div>
+      </div>
+      <div class="track-card tc-approve">
+        <div class="track-card-label">✅ APPROVED</div>
+        <div class="track-card-value" id="drwt-approved">—</div>
+        <div class="track-card-sub">Approved</div>
+        <div class="track-card-pct" id="drwt-approvedPct">—%</div>
+      </div>
+      <div class="track-card tc-awc">
+        <div class="track-card-label">💬 WITH COMMENTS</div>
+        <div class="track-card-value" id="drwt-awc">—</div>
+        <div class="track-card-sub">Approved w/ Comments</div>
+        <div class="track-card-pct" id="drwt-awcPct">—%</div>
+      </div>
+      <div class="track-card tc-warning">
+        <div class="track-card-label">⚠️ WARNING</div>
+        <div class="track-card-value" id="drwt-warning">—</div>
+        <div class="track-card-sub">Warning / Rejected</div>
+        <div class="track-card-pct" id="drwt-warningPct">—%</div>
+      </div>
+      <div class="track-card tc-pending">
+        <div class="track-card-label">⏳ PENDING</div>
+        <div class="track-card-value" id="drwt-pending">—</div>
+        <div class="track-card-sub">รอดำเนินการ</div>
+        <div class="track-card-pct" id="drwt-pendingPct">—%</div>
+      </div>
+    </div>
+
+    <div class="track-prog-wrap">
+      <div class="track-prog-lbl">
+        <span>DRW Tracking Progress</span>
+        <span id="drwt-progText">—</span>
+      </div>
+      <div class="track-prog-bar">
+        <div class="tp-approve" id="drwt-progApprove" style="width:0%"></div>
+        <div class="tp-awc"     id="drwt-progAwc"     style="width:0%"></div>
+        <div class="tp-warning" id="drwt-progWarning"  style="width:0%"></div>
+        <div class="tp-pending" id="drwt-progPending"  style="width:100%"></div>
+      </div>
+      <div class="track-legend">
+        <span><span class="tdot" style="background:#10b981"></span>Approved</span>
+        <span><span class="tdot" style="background:#0891b2"></span>w/ Comments</span>
+        <span><span class="tdot" style="background:#ef4444"></span>Warning</span>
+        <span><span class="tdot" style="background:#e2e8f0"></span>Pending</span>
+      </div>
+    </div>
+
+    <div class="track-filter-bar">
+      <span class="track-filter-label">Filter</span>
+      <select class="track-filter-sel" id="drwt-fBuilding"    onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Building</option></select>
+      <select class="track-filter-sel" id="drwt-fDiscipline"  onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Discipline</option></select>
+      <select class="track-filter-sel" id="drwt-fStatus"      onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Status</option></select>
+      <select class="track-filter-sel" id="drwt-fPhase"       onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Phase</option></select>
+      <select class="track-filter-sel" id="drwt-fReplyStatus" onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Reply Status</option></select>
+      <select class="track-filter-sel" id="drwt-fMonth"       onchange="applyTrackFilters('DRW_TRACK')"><option value="">All Month</option></select>
+      <input  class="track-search-inline" id="drwt-search" placeholder="ค้นหา..." oninput="applyTrackFilters('DRW_TRACK')">
+      <button class="track-clear-btn" onclick="clearTrackFilters('DRW_TRACK')">✕ Clear</button>
+    </div>
+
+    <div class="track-table-wrap">
+      <div style="overflow-x:auto;">
+        <table class="ttbl">
+          <thead id="drwt-thead"></thead>
+          <tbody id="drwt-tbody"><tr><td colspan="10" style="text-align:center;padding:24px;color:#94a3b8;font-family:var(--mono);">กำลังโหลด...</td></tr></tbody>
+        </table>
+      </div>
+      <div class="track-page-row">
+        <span id="drwt-pageInfo">—</span>
+        <div class="tpb" id="drwt-pageBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer" id="footerEl">
   THAI DC 1-RYG · Inspection Dashboard · Data source: Google Sheets · Auto-refreshes on load
 </div>
@@ -718,11 +924,22 @@ const PAGE_SIZE = 30;
 
 const TRACK_CFG = {
   MIR_TRACK: { id: '10EdKFSlp-HJ9u-J6GM4eaVMXoPgs-Nks6dlDoJPTqdU', sheet: 'MIR_Cover_List' },
-  WIR_TRACK: { id: '1y9_8C5-8_2EcY9fdjt_SR33hOdQwcd_wAAfTT0Kg2rw',  sheet: 'WIR_Tracking'  }
+  WIR_TRACK: { id: '1y9_8C5-8_2EcY9fdjt_SR33hOdQwcd_wAAfTT0Kg2rw',  sheet: 'WIR_Tracking'  },
+  NCR_TRACK: { id: '15pYVNPYx5p68CDFN0eaRQOtnuv_DP4clLzHgKjuRSCY', sheet: 'NCR_List' },
+  DRW_TRACK: { id: '12S7UspVqbSY953EiB_O_zts3o3VwWEkvQZFhCh0hG7c', sheet: 'DRW_List' }
 };
 const TRACK_PAGE = 30;
 
-// PascalCase → snake_case priority merge (WIR_TRACK only — MIR_TRACK has no snake_case cols)
+// Generic per-tab lookup tables (avoids repeating MIR/WIR ternaries as tab count grows)
+const TRACK_PREFIX = { MIR_TRACK:'mirt', WIR_TRACK:'wirt', NCR_TRACK:'ncrt', DRW_TRACK:'drwt' };
+const TRACK_TAB_BTN_ID   = { MIR_TRACK:'tabMIRTrack', WIR_TRACK:'tabWIRTrack', NCR_TRACK:'tabNCRTrack', DRW_TRACK:'tabDRWTrack' };
+const TRACK_VIEW_ID      = { MIR_TRACK:'viewMIRTrack', WIR_TRACK:'viewWIRTrack', NCR_TRACK:'viewNCRTrack', DRW_TRACK:'viewDRWTrack' };
+const TRACK_ACTIVE_CLASS = { MIR_TRACK:'active-mir-track', WIR_TRACK:'active-wir-track', NCR_TRACK:'active-ncr-track', DRW_TRACK:'active-drw-track' };
+const TRACK_CHIP_ID      = { MIR_TRACK:'mirTrackChip', WIR_TRACK:'wirTrackChip', NCR_TRACK:'ncrTrackChip', DRW_TRACK:'drwTrackChip' };
+const TRACK_DOC_CLASS    = { MIR_TRACK:'t-doc-mir', WIR_TRACK:'t-doc-wir', NCR_TRACK:'t-doc-ncr', DRW_TRACK:'t-doc-drw' };
+const TRACK_ACT_BTN_CLASS= { MIR_TRACK:'tp-act-mir', WIR_TRACK:'tp-act-wir', NCR_TRACK:'tp-act-ncr', DRW_TRACK:'tp-act-drw' };
+
+// PascalCase → snake_case priority merge (for tabs whose sheet has legacy snake_case duplicate cols)
 const SNAKE_MAP = {
   'Doc_No':        'doc_no',
   'Building':      'building',
@@ -740,7 +957,20 @@ const SNAKE_MAP = {
   'Inspector_MITR':'inspector_mitr',
   'MITR_Result':   'mitr_result',
   'Remarks':       'remarks',
+  'NCR_Type':      'ncr_type',
+  'Description':   'description',
+  'Root_Cause':    'root_cause',
+  'Corrective_Action': 'corrective_action',
+  'Method_Statement':  'method_statement',
+  'Submitted_By':  'submitted_by',
+  'Open_Date':     'open_date',
+  'Response_Date': 'response_date',
+  'Close_Date':    'close_date',
+  'Close_Status':  'close_status',
 };
+
+// Tabs whose sheet has legacy snake_case duplicate columns needing the merge above
+const SNAKE_MERGE_TABS = new Set(['WIR_TRACK','NCR_TRACK']);
 
 // Columns to hide from table
 const TRACK_HIDE = {
@@ -762,13 +992,32 @@ const TRACK_HIDE = {
     'print_status','remarks','doc_type','processed_date','n8n_status',
     'drive_file_id','drive_link','server_path','file_size_mb','category',
     'eq_tags','no_of_items','inspect_date','summary',''
+  ]),
+  NCR_TRACK: new Set([
+    'No.','Submitted_By','n8n_Status','Processed_Date',
+    // long-text fields shown only in the expand row
+    'Remarks','Description','Root_Cause','Corrective_Action','Method_Statement',
+    // legacy snake_case duplicate cols (values merged into PascalCase above)
+    'docType','localPath','sentAt','fileSizeMb','mainFolder','drive_root_id',
+    'doc_no','building','discipline','phase','ncr_type','description',
+    'root_cause','corrective_action','method_statement','submitted_by',
+    'open_date','response_date','close_date','close_status','status','remarks',
+    'doc_type','new_filename','drive_target','processed_date','n8n_status',
+    'drive_file_id','drive_link',''
+  ]),
+  DRW_TRACK: new Set([
+    'No.','Submitted_By','n8n_Status','Processed_Date',
+    // long-text / secondary fields shown only in the expand row (Reply_Status stays visible as a badge column)
+    'Remarks','Drawing_Title','Submitted_To','Latest_Rev','Total_Revisions',''
   ])
 };
 
 // Fields shown in expand row
 const EXPAND_FIELDS = {
   MIR_TRACK: ['Print_Status','Remarks','Inspector_HW','Inspector_MITR','MITR_Result'],
-  WIR_TRACK: ['Punch_List','Location','Remarks','Inspector_HW','Inspector_MITR','MITR_Result','summary']
+  WIR_TRACK: ['Punch_List','Location','Remarks','Inspector_HW','Inspector_MITR','MITR_Result','summary'],
+  NCR_TRACK: ['Description','Root_Cause','Corrective_Action','Method_Statement','Remarks'],
+  DRW_TRACK: ['Drawing_Title','Submitted_To','Remarks','Latest_Rev','Total_Revisions']
 };
 
 const DRIVE_COL  = 'Drive_Link';
@@ -777,15 +1026,18 @@ const STATUS_COL = 'Status';
 // Per-tab dropdown columns and their element ID suffixes
 const TRACK_DROP_COLS = {
   MIR_TRACK: ['Building','Discipline','Status','Phase','Equipment'],
-  WIR_TRACK: ['Building','Discipline','Status','Phase','System','Work_Type']
+  WIR_TRACK: ['Building','Discipline','Status','Phase','System','Work_Type'],
+  NCR_TRACK: ['Building','Discipline','Status','Phase','NCR_Type'],
+  DRW_TRACK: ['Building','Discipline','Status','Phase','Reply_Status']
 };
 const DROP_ID_SFX = {
   Building:'fBuilding', Discipline:'fDiscipline', Status:'fStatus',
-  Phase:'fPhase', System:'fSystem', Work_Type:'fWorkType', Equipment:'fEquipment'
+  Phase:'fPhase', System:'fSystem', Work_Type:'fWorkType', Equipment:'fEquipment',
+  NCR_Type:'fNCRType', Reply_Status:'fReplyStatus'
 };
 
 // Column used for month filter per tab
-const MONTH_COL = { MIR_TRACK:'Inspect_Date', WIR_TRACK:'Issue_Date' };
+const MONTH_COL = { MIR_TRACK:'Inspect_Date', WIR_TRACK:'Issue_Date', NCR_TRACK:'Issue_Date', DRW_TRACK:'Issue_Date' };
 
 // ── State ──
 const state = {
@@ -794,7 +1046,9 @@ const state = {
 };
 const trackState = {
   MIR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false },
-  WIR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false }
+  WIR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false },
+  NCR_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false },
+  DRW_TRACK: { data:[], filtered:[], cols:[], page:1, expandedIdx:-1, loaded:false }
 };
 let activeTab = 'MIR';
 
@@ -892,9 +1146,10 @@ function trackBadge(val) {
 function switchTab(tab) {
   activeTab = tab;
   const isDark = tab === 'MIR' || tab === 'WIR';
-  document.getElementById('darkMain').style.display      = isDark           ? '' : 'none';
-  document.getElementById('viewMIRTrack').style.display  = tab==='MIR_TRACK'? '' : 'none';
-  document.getElementById('viewWIRTrack').style.display  = tab==='WIR_TRACK'? '' : 'none';
+  document.getElementById('darkMain').style.display = isDark ? '' : 'none';
+  Object.keys(TRACK_VIEW_ID).forEach(tk => {
+    document.getElementById(TRACK_VIEW_ID[tk]).style.display = (tab === tk) ? '' : 'none';
+  });
   if (isDark) {
     document.getElementById('viewMIR').classList.toggle('active', tab==='MIR');
     document.getElementById('viewWIR').classList.toggle('active', tab==='WIR');
@@ -902,10 +1157,11 @@ function switchTab(tab) {
   document.body.style.background = isDark ? 'var(--bg)' : '#f1f5f9';
   const footer = document.getElementById('footerEl');
   footer.className = isDark ? 'footer' : 'footer footer-light';
-  document.getElementById('tabMIR').className      = 'tab-btn'+(tab==='MIR'       ?' active-mir'      :'');
-  document.getElementById('tabWIR').className      = 'tab-btn'+(tab==='WIR'       ?' active-wir'      :'');
-  document.getElementById('tabMIRTrack').className = 'tab-btn'+(tab==='MIR_TRACK' ?' active-mir-track':'');
-  document.getElementById('tabWIRTrack').className = 'tab-btn'+(tab==='WIR_TRACK' ?' active-wir-track':'');
+  document.getElementById('tabMIR').className = 'tab-btn'+(tab==='MIR' ?' active-mir':'');
+  document.getElementById('tabWIR').className = 'tab-btn'+(tab==='WIR' ?' active-wir':'');
+  Object.keys(TRACK_TAB_BTN_ID).forEach(tk => {
+    document.getElementById(TRACK_TAB_BTN_ID[tk]).className = 'tab-btn'+(tab===tk ? ' '+TRACK_ACTIVE_CLASS[tk] : '');
+  });
   if (isDark && !state[tab].loaded)       loadData(tab);
   if (!isDark && !trackState[tab].loaded) loadTrackingData(tab);
 }
@@ -963,14 +1219,16 @@ function showFallbackMIR() {
 // ═══════════════════════════════════════════════════════
 async function loadTrackingData(tab) {
   const cfg    = TRACK_CFG[tab];
-  const prefix = tab==='MIR_TRACK'?'mirt':'wirt';
-  const errId  = tab==='MIR_TRACK'?'errMIRTrack':'errWIRTrack';
+  const prefix = TRACK_PREFIX[tab];
+  const errId  = 'err'+tab.replace('_TRACK','')+'Track';
   document.getElementById('loadingOverlay').style.display='flex';
   document.getElementById('loadingText').textContent=`กำลังโหลด ${cfg.sheet}...`;
   document.getElementById('refreshBtn').disabled=true;
   document.getElementById(errId).style.display='none';
   try {
-    const url  = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}`;
+    // headers=1 forces row 1 to be treated as the header row even when the
+    // sheet has 0-1 data rows (gviz's auto-detection otherwise returns blank labels)
+    const url  = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}&headers=1`;
     const res  = await fetch(url);
     const text = await res.text();
     const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
@@ -983,8 +1241,8 @@ async function loadTrackingData(tab) {
         return cell.f!=null?cell.f:(cell.v!=null?fmtDate(String(cell.v)):'');
       })
     ).filter(r=>r.some(c=>c!==''));
-    // WIR_TRACK: merge snake_case values into PascalCase columns
-    if (tab==='WIR_TRACK') rawRows = mergeSnakeToPascal(rawRows, cols);
+    // Merge legacy snake_case values into PascalCase columns for affected tabs
+    if (SNAKE_MERGE_TABS.has(tab)) rawRows = mergeSnakeToPascal(rawRows, cols);
     trackState[tab].cols = cols;
     trackState[tab].data = rawRows;
     trackState[tab].loaded      = true;
@@ -1040,7 +1298,7 @@ function updateChips() {
 // SUMMARY — Tracking (5 categories)
 // ═══════════════════════════════════════════════════════
 function updateTrackingSummary(tab) {
-  const s=trackState[tab], prefix=tab==='MIR_TRACK'?'mirt':'wirt';
+  const s=trackState[tab], prefix=TRACK_PREFIX[tab];
   const total=s.data.length;
   const statusCI=s.cols.findIndex(c=>c===STATUS_COL);
   let approved=0,awc=0,warning=0,pending=0;
@@ -1068,8 +1326,9 @@ function updateTrackingSummary(tab) {
   document.getElementById(prefix+'-progText').textContent=`${approved+awc}/${total} approved`;
 }
 function updateTrackChips() {
-  document.getElementById('mirTrackChip').textContent=trackState.MIR_TRACK.data.length||'—';
-  document.getElementById('wirTrackChip').textContent=trackState.WIR_TRACK.data.length||'—';
+  Object.keys(TRACK_CHIP_ID).forEach(tk => {
+    document.getElementById(TRACK_CHIP_ID[tk]).textContent = trackState[tk].data.length || '—';
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1077,7 +1336,7 @@ function updateTrackChips() {
 // ═══════════════════════════════════════════════════════
 function populateDropdowns(tab) {
   const s=trackState[tab], cols=s.cols;
-  const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
+  const prefix=TRACK_PREFIX[tab];
   // Standard field dropdowns
   TRACK_DROP_COLS[tab].forEach(field=>{
     const ci=cols.findIndex(c=>c===field);
@@ -1109,7 +1368,7 @@ function populateDropdowns(tab) {
 // ═══════════════════════════════════════════════════════
 function applyTrackFilters(tab) {
   const s=trackState[tab], cols=s.cols;
-  const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
+  const prefix=TRACK_PREFIX[tab];
   const search=(document.getElementById(prefix+'-search')?.value||'').toLowerCase();
   // Collect dropdown filter values
   const dropVals={};
@@ -1134,8 +1393,8 @@ function applyTrackFilters(tab) {
   renderTrackingTable(tab);
 }
 function clearTrackFilters(tab) {
-  const prefix=tab==='MIR_TRACK'?'mirt':'wirt';
-  ['fBuilding','fDiscipline','fStatus','fPhase','fEquipment','fSystem','fWorkType','fMonth'].forEach(id=>{
+  const prefix=TRACK_PREFIX[tab];
+  ['fBuilding','fDiscipline','fStatus','fPhase','fEquipment','fSystem','fWorkType','fNCRType','fReplyStatus','fMonth'].forEach(id=>{
     const el=document.getElementById(prefix+'-'+id); if(el) el.value='';
   });
   const sr=document.getElementById(prefix+'-search'); if(sr) sr.value='';
@@ -1167,7 +1426,7 @@ function truncCell(val, maxLen=30) {
 // TABLE RENDER — Tracking
 // ═══════════════════════════════════════════════════════
 function renderTrackingTable(tab) {
-  const s=trackState[tab], prefix=tab==='MIR_TRACK'?'mirt':'wirt', isMIR=tab==='MIR_TRACK';
+  const s=trackState[tab], prefix=TRACK_PREFIX[tab], docClass=TRACK_DOC_CLASS[tab];
   const cols=s.cols, hide=TRACK_HIDE[tab], expandFields=EXPAND_FIELDS[tab];
   const start=(s.page-1)*TRACK_PAGE, page=s.filtered.slice(start,start+TRACK_PAGE);
 
@@ -1217,7 +1476,7 @@ function renderTrackingTable(tab) {
               :'<td style="color:#94a3b8">—</td>';
           }
           if(label===STATUS_COL||label==='Print_Status') return `<td>${trackBadge(cell)}</td>`;
-          if(label==='Doc_No') return `<td><span class="${isMIR?'t-doc-mir':'t-doc-wir'}">${cell||'—'}</span></td>`;
+          if(label==='Doc_No') return `<td><span class="${docClass}">${cell||'—'}</span></td>`;
           if(label==='Location'||label==='Punch_List') return `<td>${truncCell(cell,30)}</td>`;
           return `<td>${cell!==''?cell:'—'}</td>`;
         }).join('')}
@@ -1238,7 +1497,7 @@ function renderTrackingTable(tab) {
   }
 
   const totalPg=Math.ceil(s.filtered.length/TRACK_PAGE), cur=s.page;
-  const actCls=isMIR?'tp-act-mir':'tp-act-wir';
+  const actCls=TRACK_ACT_BTN_CLASS[tab];
   let phtml=`<button class="tp-btn" onclick="changeTrackPage('${tab}',${cur-1})" ${cur===1?'disabled':''}>←</button>`;
   for(let pg=1;pg<=totalPg;pg++){
     if(pg===1||pg===totalPg||Math.abs(pg-cur)<=1)
